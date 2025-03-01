@@ -58,7 +58,7 @@ int main(int argc, char * argv[])
 {
   int client = -1;
   int portNum = 80;
-  const int buffsize = 48;
+  const int buffsize = 70;
   char buffer[buffsize];
 
   struct sockaddr_in server_addr;
@@ -72,7 +72,7 @@ int main(int argc, char * argv[])
 
   server_addr.sin_family = AF_INET;
   server_addr.sin_port = htons(portNum);
-  server_addr.sin_addr.s_addr = inet_addr("192.168.1.162");
+  server_addr.sin_addr.s_addr = inet_addr("192.168.1.185");
 
   int connection = 1;
   while(connection != 0){
@@ -81,8 +81,6 @@ int main(int argc, char * argv[])
     sleep(2);
   }
   std::cout << "Connection confirmed..." << std::endl;
-  
-  //recv(client, buffer, buffsize, 0);
 
   char temp;
   std::string input_data;
@@ -96,27 +94,30 @@ int main(int argc, char * argv[])
       buffer[i] = '\0';
     }
     //std::cout << "Received: ";
-    for(int i = 0; temp != '\n'; i++){
+    for(int i = 0; temp != '\n' && temp != '\r'; i++){
       recv(client, &temp, 1, 0);
-      if(temp == '\n'){
+      if(temp == '\n' || temp == '\r'){
         break;
       }
       buffer[i] = temp;
       //std::cout << buffer[i];
     }
-    std::cout << std::endl;
+    //std::cout << std::endl;
     temp = '\0';
-    input_data = buffer;
 
-    if(sizeof(input_data) > 1){
+    if(buffer[0] != '\0'){
       
+      input_data = buffer;
       json j = json::parse(input_data);
       //std::cout << "cmd: " << j["cmd"] << std::endl;
       //std::cout << "data: " << j["data"] << std::endl;
+      std::cout << "Received: " << j.dump() << std::endl;
 
       for(int i = 0; i < buffsize; i++){
         buffer[i] = '\0';
       }
+
+      /** 
       switch (j["cmd"].get<int>()){
         case 1: //start
           output_data["cmd"] = 1;
@@ -137,10 +138,11 @@ int main(int argc, char * argv[])
         default:
           break;
       }  
+      */
     
     }
     
-    sleep(2);
+    //sleep(2);
   }
 
   std::cout << "Connection terminated..." << std::endl;

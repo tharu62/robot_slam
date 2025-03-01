@@ -29,12 +29,11 @@ struct Data{
   float angle;
   float rpm;
   float distance;
-  float time;
 };
 
 Data last_read_data;
-int last_data_time = 0;
-int last_data_angle = 0;
+float last_data_time = 0;
+float last_data_angle = 0;
 
 /* This example creates a subclass of Node and uses a fancy C++11 lambda
 * function to shorten the callback syntax, at the expense of making the
@@ -45,9 +44,9 @@ public:
   MinimalPublisher()
   : Node("minimal_publisher"), count_(0)
   {
-    publisher_ = this->create_publisher<std_msgs::msg::String>("laser_scan", 10);
+    publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 20);
     auto timer_callback =
-      [this]() -> void {
+      [this]() -> void {;
         sensor_msgs::msg::LaserScan msg_scan = sensor_msgs::msg::LaserScan();
         msg_scan.header.frame_id = "laser_frame";
         msg_scan.header.stamp = this->now();
@@ -56,24 +55,19 @@ public:
         msg_scan.angle_increment = last_read_data.angle - last_data_angle;
         last_data_angle = last_read_data.angle;
         //msg_scan.time_increment = 0.01;
-        msg_scan.scan_time = last_read_data.time - last_data_time;
-        last_data_time = last_read_data.time;
+        //msg_scan.scan_time = last_read_data.time - last_data_time;
+        //last_data_time = last_read_data.time;
         msg_scan.range_min = 0.001;
         msg_scan.range_max = 8.0;
         msg_scan.ranges[0] = last_read_data.distance;
         this->publisher_->publish(msg_scan);
-        RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", msg_scan.c_str());
-        //auto message = std_msgs::msg::String();
-        //message.data = "Hello, world! " + std::to_string(this->count_++);
-        //RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data.c_str());
-        //this->publisher_->publish(message);
       };
-    timer_ = this->create_wall_timer(10ms, timer_callback);
+    timer_ = this->create_wall_timer(100ms, timer_callback);
   }
 
 private:
   rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
+  rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr publisher_;
   size_t count_;
 };
 
@@ -120,9 +114,9 @@ int main(int argc, char * argv[])
       buffer[i] = '\0';
     }
     //std::cout << "Received: ";
-    for(int i = 0; temp != '\n' && temp != '\r'; i++){
+    for(int i = 0; temp != '\n'; i++){
       recv(client, &temp, 1, 0);
-      if(temp == '\n' || temp == '\r'){
+      if(temp == '\n'){
         break;
       }
       buffer[i] = temp;
@@ -136,11 +130,11 @@ int main(int argc, char * argv[])
         input_data = buffer;
 
         if(sizeof(input_data) > 1){
-        
+         
         json j = json::parse(input_data);
         //std::cout << "cmd: " << j["cmd"] << std::endl;
         //std::cout << "data: " << j["data"] << std::endl;
-        //std::cout << "Received: " << j.dump() << std::endl;
+        //std::cout << "Received2: " << j.dump() << std::endl;
 
         for(int i = 0; i < buffsize; i++){
             buffer[i] = '\0';
@@ -149,8 +143,7 @@ int main(int argc, char * argv[])
         last_read_data.cmd = j["cmd"].get<int>();
         last_read_data.angle = j["angle"].get<float>();
         last_read_data.rpm = j["rpm"].get<float>();
-        last_read_data.distance = j["distance"].get<float>();
-        last_read_data.time = j["time"].get<float>();
+        last_read_data.distance = j["dist"].get<float>();
         rclcpp::spin(std::make_shared<MinimalPublisher>());
 
         /** 
@@ -177,7 +170,6 @@ int main(int argc, char * argv[])
         */
         }
     }   
-    //sleep(2);
   }
 
   std::cout << "Connection terminated..." << std::endl;
