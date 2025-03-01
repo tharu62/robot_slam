@@ -9,15 +9,21 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 add_executable(talker src/pub.cpp)
 ament_target_dependencies(talker rclcpp std_msgs)
 add_executable(listener src/sub.cpp)
 ament_target_dependencies(listener rclcpp std_msgs)
+add_executable(talker_lidar src/pub_lidar.cpp)
+ament_target_dependencies(talker_lidar rclcpp std_msgs sensor_msgs geometry_msgs)
+
 
 install(TARGETS
   talker
   listener
+  talker_lidar
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
