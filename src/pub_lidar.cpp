@@ -45,7 +45,7 @@ public:
   MinimalPublisher( ) : Node("minimal_publisher")
   {
     //publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 20);
-    publisher_ = this->create_publisher<std_msgs::msg::String>("topic", 10);
+    publisher_ = this->create_publisher<std_msgs::msg::String>("topic", 200);
   }
   /*
   void publish_(){
@@ -110,8 +110,8 @@ int main(int argc, char * argv[])
   }
   std::cout << "Connection confirmed..." << std::endl;
   
-  auto pub_node = std::make_shared<MinimalPublisher>();
-  rclcpp::spin(pub_node);
+  //auto pub_node = std::make_shared<MinimalPublisher>();
+  //rclcpp::spin(pub_node);
   //rclcpp::spin(std::make_shared<MinimalPublisher>());
 
   char temp;
@@ -140,13 +140,11 @@ int main(int argc, char * argv[])
     if(buffer[0] != '\0'){
 
       input_data = buffer;
-
-      if(sizeof(input_data) > 1){
         
       json j = json::parse(input_data);
       //std::cout << "cmd: " << j["cmd"] << std::endl;
       //std::cout << "data: " << j["data"] << std::endl;
-      //std::cout << "Received2: " << j.dump() << std::endl;
+      std::cout << "Received2: " << j.dump() << std::endl;
 
       for(int i = 0; i < buffsize; i++){
           buffer[i] = '\0';
@@ -157,7 +155,7 @@ int main(int argc, char * argv[])
       last_read_data.rpm = j["rpm"].get<float>();
       last_read_data.distance = j["dist"].get<float>();
       
-      std::cout << pub_node->val << std::endl;
+      //std::cout << pub_node->val << std::endl;
 
       /** 
        switch (j["cmd"].get<int>()){
@@ -181,8 +179,6 @@ int main(int argc, char * argv[])
         break;
         }  
         */
-      }
-        
     }
     sleep(1);
   }
