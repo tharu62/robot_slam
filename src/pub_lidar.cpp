@@ -44,25 +44,6 @@ public:
   MinimalPublisher( ) : Node("minimal_publisher")//, count_(0)
   {
     publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 20);
-    auto timer_callback =
-      [this]() -> void {
-        sensor_msgs::msg::LaserScan msg_scan = sensor_msgs::msg::LaserScan();
-        msg_scan.header.frame_id = "laser_frame";
-        msg_scan.header.stamp = this->now();
-        //msg_scan.angle_min = -3.14159;
-        //msg_scan.angle_max = 3.14159; 
-        msg_scan.angle_increment = last_read_data.angle - last_data_angle;
-        last_data_angle = last_read_data.angle;
-        //msg_scan.time_increment = 0.01;
-        //msg_scan.scan_time = last_read_data.time - last_data_time;
-        //last_data_time = last_read_data.time;
-        msg_scan.range_min = 0.001;
-        msg_scan.range_max = 8.0;
-        msg_scan.ranges[0] = last_read_data.distance;
-        this->publisher_->publish(msg_scan);
-      };
-
-    timer_ = this->create_wall_timer(50ms, timer_callback);
   }
 
   void publish_(){
@@ -90,6 +71,8 @@ private:
 
 int main(int argc, char * argv[])
 { 
+  rclcpp::init(argc, argv);
+  
   int client = -1;
   int portNum = 80;
   const int buffsize = 64;
@@ -112,13 +95,15 @@ int main(int argc, char * argv[])
   }
   std::cout << "Connection confirmed..." << std::endl;
   
+  rclcpp::spin(std::make_shared<MinimalPublisher>());
+  
   char temp;
   std::string input_data;
   std::string str;
   json output_data;
   // loop for read and write data
   while(1){
-
+    
     input_data = "";
     for(int i = 0; i < buffsize; i++){
       buffer[i] = '\0';
@@ -187,8 +172,6 @@ int main(int argc, char * argv[])
   std::cout << "Connection terminated..." << std::endl;
   close(client);
 
-  rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<MinimalPublisher>());
   rclcpp::shutdown();
   return 0;
 }
