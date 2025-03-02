@@ -65,8 +65,8 @@ public:
   } 
   */
 
+  //puzzano davvero
   void pub_my_balls(){
-    
     auto message = std_msgs::msg::String();
     message.data = "Hello, world! ";
     //RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data.c_str());
