@@ -8,15 +8,7 @@
 #include "sensor_msgs/msg/laser_scan.hpp"
 
 //librerie per socket programming
-#include <iostream>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <netdb.h>
+#include "tcp_connection.h"
 
 //json libraries
 #include <nlohmann/json.hpp>
@@ -88,28 +80,10 @@ int main(int argc, char * argv[])
 { 
   rclcpp::init(argc, argv);
 
-  int client = -1;
-  int portNum = 80;
-  const int buffsize = 64;
-  char buffer[buffsize];
-  struct sockaddr_in server_addr;
-  client = socket(AF_INET, SOCK_STREAM, 0);
-  if(client < 0){
-    std::cout << "Error establishing socket..." << std::endl;
-    exit(1);
-  }
-  std::cout << "Socket client has been created..." << std::endl;
-  server_addr.sin_family = AF_INET;
-  server_addr.sin_port = htons(portNum);
-  server_addr.sin_addr.s_addr = inet_addr("192.168.1.185");
-  int connection = 1;
-  while(connection != 0){
-    std::cout << "Connecting to server..." << std::endl;
-    connection = connect(client, (struct sockaddr *)&server_addr, sizeof(server_addr));
-    sleep(2);
-  }
-  std::cout << "Connection confirmed..." << std::endl;
-  
+  int client;
+  tcp_init(client);
+  char buffer[TCP_BUFFSIZE];
+    
   //auto pub_node = std::make_shared<MinimalPublisher>();
   //rclcpp::spin(pub_node);
   //rclcpp::spin(std::make_shared<MinimalPublisher>());
@@ -122,7 +96,7 @@ int main(int argc, char * argv[])
   while(1){
     
     input_data = "";
-    for(int i = 0; i < buffsize; i++){
+    for(int i = 0; i < TCP_BUFFSIZE; i++){
       buffer[i] = '\0';
     }
     //std::cout << "Received: ";
@@ -140,22 +114,25 @@ int main(int argc, char * argv[])
     if(buffer[0] != '\0'){
 
       input_data = buffer;
-        
-      json j = json::parse(input_data);
-      //std::cout << "cmd: " << j["cmd"] << std::endl;
-      //std::cout << "data: " << j["data"] << std::endl;
-      std::cout << "Received2: " << j.dump() << std::endl;
 
-      for(int i = 0; i < buffsize; i++){
-          buffer[i] = '\0';
-      }
+      std::cout << "Input Data: ";
+      std::cout << input_data << std::endl;
+        
+      // json j = json::parse(input_data);
+      // //std::cout << "cmd: " << j["cmd"] << std::endl;
+      // //std::cout << "data: " << j["data"] << std::endl;
+      // std::cout << "Received2: " << j.dump() << std::endl;
+
+      // for(int i = 0; i < TCP_BUFFSIZE; i++){
+      //     buffer[i] = '\0';
+      // }
       
-      last_read_data.cmd = j["cmd"].get<int>();
-      last_read_data.angle = j["angle"].get<float>();
-      last_read_data.rpm = j["rpm"].get<float>();
-      last_read_data.distance = j["dist"].get<float>();
+      // last_read_data.cmd = j["cmd"].get<int>();
+      // last_read_data.angle = j["angle"].get<float>();
+      // last_read_data.rpm = j["rpm"].get<float>();
+      // last_read_data.distance = j["dist"].get<float>();
       
-      //std::cout << pub_node->val << std::endl;
+      // std::cout << pub_node->val << std::endl;
 
       /** 
        switch (j["cmd"].get<int>()){
@@ -180,12 +157,10 @@ int main(int argc, char * argv[])
         }  
         */
     }
-    sleep(1);
+    // sleep(1);
   }
 
-  std::cout << "Connection terminated..." << std::endl;
-  close(client);
-
+  tcp_close(client);
   rclcpp::shutdown();
   return 0;
 }
