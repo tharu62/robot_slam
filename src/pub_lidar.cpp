@@ -1,6 +1,7 @@
 #include <chrono>
 #include <memory>
 #include <string>
+#include <unistd.h>
 
 //librerie per ROS2
 #include "rclcpp/rclcpp.hpp"
@@ -79,7 +80,6 @@ private:
 int main(int argc, char * argv[])
 { 
   rclcpp::init(argc, argv);
-
   int client;
   tcp_init(client);
   char buffer[TCP_BUFFSIZE];
@@ -117,6 +117,8 @@ int main(int argc, char * argv[])
 
       std::cout << "Input Data: ";
       std::cout << input_data << std::endl;
+
+      usleep(20000);
         
       // json j = json::parse(input_data);
       // //std::cout << "cmd: " << j["cmd"] << std::endl;
@@ -157,7 +159,8 @@ int main(int argc, char * argv[])
         }  
         */
     }
-    sleep(1);
+
+    //sleep(1);
   }
 
   tcp_close(client);
