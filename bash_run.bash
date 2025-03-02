@@ -1,2 +1,2 @@
-#! /bin/bash
-source install/setup.bash
+#!/bin/bash
+screen -dmS test bash -c 'cd install'
