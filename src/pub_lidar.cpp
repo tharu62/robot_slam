@@ -41,6 +41,7 @@ float last_data_angle = 0;
 class MinimalPublisher : public rclcpp::Node
 {
 public:
+  int val = 62;
   MinimalPublisher( ) : Node("minimal_publisher")
   {
     //publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 20);
@@ -73,6 +74,10 @@ public:
     this->publisher_->publish(message);
   }
 
+  void simple_print(){
+    
+  }
+
 private:
   rclcpp::TimerBase::SharedPtr timer_;
   //rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr publisher_;
@@ -82,7 +87,6 @@ private:
 int main(int argc, char * argv[])
 { 
   rclcpp::init(argc, argv);
-
 
   int client = -1;
   int portNum = 80;
@@ -152,9 +156,9 @@ int main(int argc, char * argv[])
       last_read_data.angle = j["angle"].get<float>();
       last_read_data.rpm = j["rpm"].get<float>();
       last_read_data.distance = j["dist"].get<float>();
-
-      pub_node->pub_my_balls();
       
+      std::cout << pub_node->val << std::endl;
+
       /** 
        switch (j["cmd"].get<int>()){
         case 1: //start
@@ -180,7 +184,7 @@ int main(int argc, char * argv[])
       }
         
     }
-    //sleep(100);
+    sleep(1);
   }
 
   std::cout << "Connection terminated..." << std::endl;
