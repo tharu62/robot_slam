@@ -41,12 +41,11 @@ float last_data_angle = 0;
 class MinimalPublisher : public rclcpp::Node
 {
 public:
-  MinimalPublisher()
-  : Node("minimal_publisher"), count_(0)
+  MinimalPublisher( ) : Node("minimal_publisher")//, count_(0)
   {
     publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 20);
     auto timer_callback =
-      [this]() -> void {;
+      [this]() -> void {
         sensor_msgs::msg::LaserScan msg_scan = sensor_msgs::msg::LaserScan();
         msg_scan.header.frame_id = "laser_frame";
         msg_scan.header.stamp = this->now();
@@ -62,36 +61,49 @@ public:
         msg_scan.ranges[0] = last_read_data.distance;
         this->publisher_->publish(msg_scan);
       };
-    timer_ = this->create_wall_timer(100ms, timer_callback);
+
+    timer_ = this->create_wall_timer(50ms, timer_callback);
   }
+
+  void publish_(){
+    sensor_msgs::msg::LaserScan msg_scan = sensor_msgs::msg::LaserScan();
+    msg_scan.header.frame_id = "laser_frame";
+    msg_scan.header.stamp = this->now();
+    //msg_scan.angle_min = -3.14159;
+    //msg_scan.angle_max = 3.14159; 
+    msg_scan.angle_increment = last_read_data.angle - last_data_angle;
+    last_data_angle = last_read_data.angle;
+    //msg_scan.time_increment = 0.01;
+    //msg_scan.scan_time = last_read_data.time - last_data_time;
+    //last_data_time = last_read_data.time;
+    msg_scan.range_min = 0.001;
+    msg_scan.range_max = 8.0;
+    msg_scan.ranges[0] = last_read_data.distance;
+    this->publisher_->publish(msg_scan);
+  } 
 
 private:
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr publisher_;
-  size_t count_;
+  //size_t count_;
 };
 
-
 int main(int argc, char * argv[])
-{
+{ 
   int client = -1;
   int portNum = 80;
   const int buffsize = 64;
   char buffer[buffsize];
-
   struct sockaddr_in server_addr;
-  
   client = socket(AF_INET, SOCK_STREAM, 0);
   if(client < 0){
     std::cout << "Error establishing socket..." << std::endl;
     exit(1);
   }
   std::cout << "Socket client has been created..." << std::endl;
-
   server_addr.sin_family = AF_INET;
   server_addr.sin_port = htons(portNum);
   server_addr.sin_addr.s_addr = inet_addr("192.168.1.185");
-
   int connection = 1;
   while(connection != 0){
     std::cout << "Connecting to server..." << std::endl;
@@ -99,9 +111,7 @@ int main(int argc, char * argv[])
     sleep(2);
   }
   std::cout << "Connection confirmed..." << std::endl;
-
-  rclcpp::init(argc, argv);
-
+  
   char temp;
   std::string input_data;
   std::string str;
@@ -127,53 +137,58 @@ int main(int argc, char * argv[])
     
     if(buffer[0] != '\0'){
 
-        input_data = buffer;
+      input_data = buffer;
 
-        if(sizeof(input_data) > 1){
-         
-        json j = json::parse(input_data);
-        //std::cout << "cmd: " << j["cmd"] << std::endl;
-        //std::cout << "data: " << j["data"] << std::endl;
-        //std::cout << "Received2: " << j.dump() << std::endl;
+      if(sizeof(input_data) > 1){
+        
+      json j = json::parse(input_data);
+      //std::cout << "cmd: " << j["cmd"] << std::endl;
+      //std::cout << "data: " << j["data"] << std::endl;
+      //std::cout << "Received2: " << j.dump() << std::endl;
 
-        for(int i = 0; i < buffsize; i++){
-            buffer[i] = '\0';
-        }
+      for(int i = 0; i < buffsize; i++){
+          buffer[i] = '\0';
+      }
+      
+      last_read_data.cmd = j["cmd"].get<int>();
+      last_read_data.angle = j["angle"].get<float>();
+      last_read_data.rpm = j["rpm"].get<float>();
+      last_read_data.distance = j["dist"].get<float>();
 
-        last_read_data.cmd = j["cmd"].get<int>();
-        last_read_data.angle = j["angle"].get<float>();
-        last_read_data.rpm = j["rpm"].get<float>();
-        last_read_data.distance = j["dist"].get<float>();
-        rclcpp::spin(std::make_shared<MinimalPublisher>());
-
-        /** 
-         switch (j["cmd"].get<int>()){
-            case 1: //start
-            output_data["cmd"] = 1;
-            output_data["data"] = 10;
-            str = output_data.dump();
-            std::strncpy(buffer, str.c_str(), sizeof(buffer) - 1);
-            buffer[sizeof(buffer) - 1] = '\0'; // Ensure null-termination
-            send(client, buffer, sizeof(buffer), 0);
-            break;
-            case 2: //stop
-            output_data["cmd"] = 2;
-            output_data["data"] = 10;
-            str = output_data.dump();
-            std::strncpy(buffer, str.c_str(), sizeof(buffer) - 1);
-            buffer[sizeof(buffer) - 1] = '\0'; // Ensure null-termination
-            send(client, buffer, sizeof(buffer), 0);
-            break;  
-            default:
-            break;
+      MinimalPublisher().publish_();
+      
+      /** 
+       switch (j["cmd"].get<int>()){
+        case 1: //start
+        output_data["cmd"] = 1;
+        output_data["data"] = 10;
+        str = output_data.dump();
+        std::strncpy(buffer, str.c_str(), sizeof(buffer) - 1);
+        buffer[sizeof(buffer) - 1] = '\0'; // Ensure null-termination
+        send(client, buffer, sizeof(buffer), 0);
+        break;
+        case 2: //stop
+        output_data["cmd"] = 2;
+        output_data["data"] = 10;
+        str = output_data.dump();
+        std::strncpy(buffer, str.c_str(), sizeof(buffer) - 1);
+        buffer[sizeof(buffer) - 1] = '\0'; // Ensure null-termination
+        send(client, buffer, sizeof(buffer), 0);
+        break;  
+        default:
+        break;
         }  
         */
-        }
-    }   
+      }
+        
+    }
   }
 
   std::cout << "Connection terminated..." << std::endl;
   close(client);
+
+  rclcpp::init(argc, argv);
+  rclcpp::spin(std::make_shared<MinimalPublisher>());
   rclcpp::shutdown();
   return 0;
 }
