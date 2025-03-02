@@ -41,38 +41,48 @@ float last_data_angle = 0;
 class MinimalPublisher : public rclcpp::Node
 {
 public:
-  MinimalPublisher( ) : Node("minimal_publisher")//, count_(0)
+  MinimalPublisher( ) : Node("minimal_publisher")
   {
-    publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 20);
+    //publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 20);
+    publisher_ = this->create_publisher<std_msgs::msg::String>("topic", 10);
   }
-
+  /*
   void publish_(){
     sensor_msgs::msg::LaserScan msg_scan = sensor_msgs::msg::LaserScan();
     msg_scan.header.frame_id = "laser_frame";
     msg_scan.header.stamp = this->now();
-    //msg_scan.angle_min = -3.14159;
-    //msg_scan.angle_max = 3.14159; 
+    msg_scan.angle_min = -3.14159;
+    msg_scan.angle_max = 3.14159; 
     msg_scan.angle_increment = last_read_data.angle - last_data_angle;
     last_data_angle = last_read_data.angle;
-    //msg_scan.time_increment = 0.01;
-    //msg_scan.scan_time = last_read_data.time - last_data_time;
-    //last_data_time = last_read_data.time;
+    msg_scan.time_increment = 0.01;
+    msg_scan.scan_time = 0;
+    last_data_time = 0;
     msg_scan.range_min = 0.001;
     msg_scan.range_max = 8.0;
     msg_scan.ranges[0] = last_read_data.distance;
     this->publisher_->publish(msg_scan);
   } 
+  */
+
+  void pub_my_balls(){
+    auto message = std_msgs::msg::String();
+    message.data = "Hello, world! ";
+    //RCLCPP_INFO(this->get_logger(), "Publishing: '%s'", message.data.c_str());
+    this->publisher_->publish(message);
+  }
 
 private:
   rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr publisher_;
-  //size_t count_;
+  //rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr publisher_;
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
 };
 
 int main(int argc, char * argv[])
 { 
   rclcpp::init(argc, argv);
-  
+
+
   int client = -1;
   int portNum = 80;
   const int buffsize = 64;
@@ -95,8 +105,10 @@ int main(int argc, char * argv[])
   }
   std::cout << "Connection confirmed..." << std::endl;
   
-  rclcpp::spin(std::make_shared<MinimalPublisher>());
-  
+  auto pub_node = std::make_shared<MinimalPublisher>();
+  rclcpp::spin(pub_node);
+  //rclcpp::spin(std::make_shared<MinimalPublisher>());
+
   char temp;
   std::string input_data;
   std::string str;
@@ -140,7 +152,7 @@ int main(int argc, char * argv[])
       last_read_data.rpm = j["rpm"].get<float>();
       last_read_data.distance = j["dist"].get<float>();
 
-      MinimalPublisher().publish_();
+      pub_node->pub_my_balls();
       
       /** 
        switch (j["cmd"].get<int>()){
@@ -167,6 +179,7 @@ int main(int argc, char * argv[])
       }
         
     }
+    //sleep(100);
   }
 
   std::cout << "Connection terminated..." << std::endl;
