@@ -32,12 +32,12 @@ float last_data_angle = 0;
 int main(int argc, char * argv[])
 { 
   rclcpp::init(argc, argv);
-  
+
   int client;
   tcp_init(client);
   char buffer[TCP_BUFFSIZE];
     
-  auto pub_node = std::make_shared<MinimalPublisher>();
+  auto pub_node = std::make_shared<Lidar_Publisher>();
   rclcpp::spin(pub_node);
   //rclcpp::spin(std::make_shared<MinimalPublisher>());
 
@@ -47,72 +47,74 @@ int main(int argc, char * argv[])
   json output_data;
   // loop for read and write data
   while(1){
+
+    // input_data = "";
+    // for(int i = 0; i < TCP_BUFFSIZE; i++){
+    //   buffer[i] = '\0';
+    // }
+    // //std::cout << "Received: ";
+    // for(int i = 0; temp != '\n'; i++){
+    //   recv(client, &temp, 1, 0);
+    //   if(temp == '\n'){
+    //     break;
+    //   }
+    //   buffer[i] = temp;
+    //   //std::cout << buffer[i];
+    // }
+    // //std::cout << std::endl;
+    // temp = '\0';
     
-    input_data = "";
-    for(int i = 0; i < TCP_BUFFSIZE; i++){
-      buffer[i] = '\0';
-    }
-    //std::cout << "Received: ";
-    for(int i = 0; temp != '\n'; i++){
-      recv(client, &temp, 1, 0);
-      if(temp == '\n'){
-        break;
-      }
-      buffer[i] = temp;
-      //std::cout << buffer[i];
-    }
-    //std::cout << std::endl;
-    temp = '\0';
-    
-    if(buffer[0] != '\0'){
+    // if(buffer[0] != '\0'){
 
-      input_data = buffer;
+    //   input_data = buffer;
 
-      //std::cout << "Input Data: ";
-      //std::cout << input_data << std::endl;
+    //   //std::cout << "Input Data: ";
+    //   //std::cout << input_data << std::endl;
 
-      pub_node->pub_my_balls();
-      usleep(20000);
+    //   pub_node->pub_my_balls();
+    //   usleep(20000);
 
-      // json j = json::parse(input_data);
-      // //std::cout << "cmd: " << j["cmd"] << std::endl;
-      // //std::cout << "data: " << j["data"] << std::endl;
-      // std::cout << "Received2: " << j.dump() << std::endl;
+    //   // json j = json::parse(input_data);
+    //   // //std::cout << "cmd: " << j["cmd"] << std::endl;
+    //   // //std::cout << "data: " << j["data"] << std::endl;
+    //   // std::cout << "Received2: " << j.dump() << std::endl;
 
-      // for(int i = 0; i < TCP_BUFFSIZE; i++){
-      //     buffer[i] = '\0';
-      // }
+    //   // for(int i = 0; i < TCP_BUFFSIZE; i++){
+    //   //     buffer[i] = '\0';
+    //   // }
       
-      // last_read_data.cmd = j["cmd"].get<int>();
-      // last_read_data.angle = j["angle"].get<float>();
-      // last_read_data.rpm = j["rpm"].get<float>();
-      // last_read_data.distance = j["dist"].get<float>();
+    //   // last_read_data.cmd = j["cmd"].get<int>();
+    //   // last_read_data.angle = j["angle"].get<float>();
+    //   // last_read_data.rpm = j["rpm"].get<float>();
+    //   // last_read_data.distance = j["dist"].get<float>();
       
-      // std::cout << pub_node->val << std::endl;
+    //   // std::cout << pub_node->val << std::endl;
 
-      /** 
-       switch (j["cmd"].get<int>()){
-        case 1: //start
-        output_data["cmd"] = 1;
-        output_data["data"] = 10;
-        str = output_data.dump();
-        std::strncpy(buffer, str.c_str(), sizeof(buffer) - 1);
-        buffer[sizeof(buffer) - 1] = '\0'; // Ensure null-termination
-        send(client, buffer, sizeof(buffer), 0);
-        break;
-        case 2: //stop
-        output_data["cmd"] = 2;
-        output_data["data"] = 10;
-        str = output_data.dump();
-        std::strncpy(buffer, str.c_str(), sizeof(buffer) - 1);
-        buffer[sizeof(buffer) - 1] = '\0'; // Ensure null-termination
-        send(client, buffer, sizeof(buffer), 0);
-        break;  
-        default:
-        break;
-        }  
-        */
-    }
+    //   /** 
+    //    switch (j["cmd"].get<int>()){
+    //     case 1: //start
+    //     output_data["cmd"] = 1;
+    //     output_data["data"] = 10;
+    //     str = output_data.dump();
+    //     std::strncpy(buffer, str.c_str(), sizeof(buffer) - 1);
+    //     buffer[sizeof(buffer) - 1] = '\0'; // Ensure null-termination
+    //     send(client, buffer, sizeof(buffer), 0);
+    //     break;
+    //     case 2: //stop
+    //     output_data["cmd"] = 2;
+    //     output_data["data"] = 10;
+    //     str = output_data.dump();
+    //     std::strncpy(buffer, str.c_str(), sizeof(buffer) - 1);
+    //     buffer[sizeof(buffer) - 1] = '\0'; // Ensure null-termination
+    //     send(client, buffer, sizeof(buffer), 0);
+    //     break;  
+    //     default:
+    //     break;
+    //     }  
+    //     */
+    // }
+
+
 
   }
 
