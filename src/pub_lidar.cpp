@@ -67,10 +67,6 @@ public:
     this->publisher_->publish(message);
   }
 
-  void simple_print(){
-    
-  }
-
 private:
   rclcpp::TimerBase::SharedPtr timer_;
   //rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr publisher_;
@@ -84,8 +80,8 @@ int main(int argc, char * argv[])
   tcp_init(client);
   char buffer[TCP_BUFFSIZE];
     
-  //auto pub_node = std::make_shared<MinimalPublisher>();
-  //rclcpp::spin(pub_node);
+  auto pub_node = std::make_shared<MinimalPublisher>();
+  rclcpp::spin(pub_node);
   //rclcpp::spin(std::make_shared<MinimalPublisher>());
 
   char temp;
@@ -115,11 +111,12 @@ int main(int argc, char * argv[])
 
       input_data = buffer;
 
-      std::cout << "Input Data: ";
-      std::cout << input_data << std::endl;
+      //std::cout << "Input Data: ";
+      //std::cout << input_data << std::endl;
 
+      pub_node->pub_my_balls();
       usleep(20000);
-        
+
       // json j = json::parse(input_data);
       // //std::cout << "cmd: " << j["cmd"] << std::endl;
       // //std::cout << "data: " << j["data"] << std::endl;
@@ -160,7 +157,6 @@ int main(int argc, char * argv[])
         */
     }
 
-    //sleep(1);
   }
 
   tcp_close(client);
