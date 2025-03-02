@@ -11,43 +11,27 @@
 #include "lidar_publisher.hpp"
 #include "tcp_connection.h"
 
-//json libraries
-#include <nlohmann/json.hpp>
+
 
 using namespace std::chrono_literals;
 using json = nlohmann::json;
 
-struct Data{
-  int cmd;
-  float angle;
-  float rpm;
-  float distance;
-};
+int client;
 
 Data last_read_data;
-float last_data_time = 0;
+double last_data_time = 0;
 float last_data_angle = 0;
-
 
 int main(int argc, char * argv[])
 { 
   rclcpp::init(argc, argv);
-
-  int client;
   tcp_init(client);
-  char buffer[TCP_BUFFSIZE];
     
   auto pub_node = std::make_shared<Lidar_Publisher>();
   rclcpp::spin(pub_node);
+
   //rclcpp::spin(std::make_shared<MinimalPublisher>());
-
-  char temp;
-  std::string input_data;
-  std::string str;
-  json output_data;
   // loop for read and write data
-  while(1){
-
     // input_data = "";
     // for(int i = 0; i < TCP_BUFFSIZE; i++){
     //   buffer[i] = '\0';
@@ -71,9 +55,6 @@ int main(int argc, char * argv[])
     //   //std::cout << "Input Data: ";
     //   //std::cout << input_data << std::endl;
 
-    //   pub_node->pub_my_balls();
-    //   usleep(20000);
-
     //   // json j = json::parse(input_data);
     //   // //std::cout << "cmd: " << j["cmd"] << std::endl;
     //   // //std::cout << "data: " << j["data"] << std::endl;
@@ -87,8 +68,6 @@ int main(int argc, char * argv[])
     //   // last_read_data.angle = j["angle"].get<float>();
     //   // last_read_data.rpm = j["rpm"].get<float>();
     //   // last_read_data.distance = j["dist"].get<float>();
-      
-    //   // std::cout << pub_node->val << std::endl;
 
     //   /** 
     //    switch (j["cmd"].get<int>()){
@@ -113,10 +92,6 @@ int main(int argc, char * argv[])
     //     }  
     //     */
     // }
-
-
-
-  }
 
   tcp_close(client);
   rclcpp::shutdown();

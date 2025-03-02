@@ -1,4 +1,4 @@
-#ifndef TCP_CONNTION_H
+#ifndef TCP_CONNECTION_H
 #define TCP_CONNECTION_H
 
 //librerie per socket programming
