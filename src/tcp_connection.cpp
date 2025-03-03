@@ -46,8 +46,5 @@ void read_data(int& client, char *buffer){
     buffer[i] = tcp_temp_data;
   }
   tcp_temp_data = '\0';
-<<<<<<< HEAD
   
-=======
->>>>>>> ab499c9 (...)
 }

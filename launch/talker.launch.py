@@ -31,12 +31,12 @@ def generate_launch_description():
 
     # This parameter has changed its meaning slightly from previous versions
     ld.add_action(DeclareLaunchArgument(name='model', default_value=str(default_model_path),
-            description='Path to robot urdf file relative to urdf_tutorial package'))
+            description='Path to robot urdf file relative to robot_slam package'))
 
     ld.add_action(IncludeLaunchDescription(
         PathJoinSubstitution([FindPackageShare('urdf_launch'), 'launch', 'display.launch.py']),
         launch_arguments={
-            'urdf_package': 'urdf_tutorial',
+            'urdf_package': 'robot_slam',
             'urdf_package_path': LaunchConfiguration('model'),
             'rviz_config': LaunchConfiguration('rvizconfig'),
             'jsp_gui': LaunchConfiguration('gui')}.items()

@@ -46,7 +46,6 @@ class Lidar_Publisher : public rclcpp::Node
     : Node("minimal_publisher"), count_(0)
     {
       publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 100);
-<<<<<<< HEAD
       timer_ = this->create_wall_timer( 10ms, [this]()->void{ this->call_back(); });
     }
 
@@ -72,17 +71,6 @@ class Lidar_Publisher : public rclcpp::Node
 
       input_data = buffer;
       
-=======
-      timer_ = this->create_wall_timer(10ms, 
-      [this]()->void{ 
-        this->call_back();
-      });
-    }
-
-    void call_back(){
-      
-      input_data = "";
->>>>>>> ab499c9 (...)
       for(int i = 0; i < TCP_BUFFSIZE; i++){
         buffer[i] = '\0';
       }
