@@ -44,4 +44,20 @@ void tcp_close(int& client){
     std::cout << "Connection terminated..." << std::endl;
 }
 
+char temp;
+
+char * read_data(char* buffer){
+      for(int i = 0; i < TCP_BUFFSIZE; i++){
+        buffer[i] = '\0';
+      }
+      for(int i = 0; temp != '\n'; i++){
+        recv(client, &temp, 1, 0);
+        if(temp == '\n'){
+          break;
+        }
+        buffer[i] = temp;
+      }
+      temp = '\0';
+      return buffer;
+}
 #endif //TCP_CONNECTION_H
