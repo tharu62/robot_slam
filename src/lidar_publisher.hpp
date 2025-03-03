@@ -1,7 +1,7 @@
 #ifndef LIDAR_PUBLISHER_HPP
 #define LIDAR_PUBLISHER_HPP
 
-#define RANGES_BUFF_SIZE 100
+#define RANGES_BUFF_SIZE 2
 
 #include <chrono>
 #include <memory>
@@ -54,24 +54,21 @@ class Lidar_Publisher : public rclcpp::Node
   json output_data;
 
   Lidar_Publisher()
-    : Node("minimal_publisher"), distance_{0.0}
+    : Node("minimal_publisher"), distance_{0.0}, input_data("")
     {
-      publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 10);
-      timer_ = this->create_wall_timer( 1ms, [this]()->void{ this->call_back(); });
+      publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 200);
+      timer_ = this->create_wall_timer( 1us, [this]()->void{ this->call_back(); });
     }
 
   void call_back(){
 
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
+    // std::chrono::time_point<std::chrono::system_clock> start, end;
+    // start = std::chrono::system_clock::now();
 
     for(int i=0; i<RANGES_BUFF_SIZE; ++i){
       distance_[i] = 0.0;
       
-      input_data = "";
-      for(int i = 0; i < TCP_BUFFSIZE; i++){
-        buffer[i] = '\0';
-      }
+      buffer[0] = '\0';
 
       for(int i = 0; temp != '\n'; i++){
     
