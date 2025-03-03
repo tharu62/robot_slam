@@ -3,7 +3,7 @@
 <package format="3">
   <name>robot_slam</name>
   <version>0.0.0</version>
-  <description>Firmware for slam for robot with lidar and microcontrollers with wifi</description>
+  <description>Firmware for slam robot with lidar and microcontrollers with wifi comunication</description>
   <maintainer email="tharinduxdeshan@gmail.com">utonto</maintainer>
   <license>Apache-2.0</license>
 
