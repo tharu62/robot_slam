@@ -11,8 +11,6 @@
 #include "lidar_publisher.hpp"
 #include "tcp_connection.h"
 
-
-
 using namespace std::chrono_literals;
 using json = nlohmann::json;
 
