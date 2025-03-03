@@ -37,6 +37,7 @@ float last_data_angle = 0;
 
 int main(int argc, char * argv[])
 { 
+  //signal handler
   signal(SIGINT, sigint_handler);
 
   rclcpp::init(argc, argv);
