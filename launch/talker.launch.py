@@ -42,7 +42,7 @@ def generate_launch_description():
             'jsp_gui': LaunchConfiguration('gui')}.items()
     ))
 
-    # ld.add_action(talker_node)
+    ld.add_action(talker_node)
 
     # cmd per lanciare launch file con rviz:
     # ros2 launch robot_slam talker.launch.py model:=/home/utonto/ros2_ws/src/robot_slam/description/robot.urdf.xacro
