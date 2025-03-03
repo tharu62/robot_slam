@@ -16,7 +16,7 @@ add_executable(talker src/pub.cpp)
 ament_target_dependencies(talker rclcpp std_msgs)
 add_executable(listener src/sub.cpp)
 ament_target_dependencies(listener rclcpp std_msgs)
-add_executable(talker_lidar src/pub_lidar.cpp)
+add_executable(talker_lidar src/pub_lidar.cpp src/tcp_connection.cpp)
 ament_target_dependencies(talker_lidar rclcpp std_msgs sensor_msgs geometry_msgs)
 
 

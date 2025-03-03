@@ -46,10 +46,11 @@ class Lidar_Publisher : public rclcpp::Node
     : Node("minimal_publisher"), count_(0)
     {
       publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 100);
-      timer_ = this->create_wall_timer(10ms, 
-      [this]()->void{ 
-        this->call_back();
-      });
+      timer_ = this->create_wall_timer(
+                                  10ms, 
+                                  [this]()->void{ 
+                                    this->call_back();
+                                  });
     }
       
     void call_back(){
