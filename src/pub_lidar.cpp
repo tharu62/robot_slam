@@ -2,6 +2,7 @@
 #include <memory>
 #include <string>
 #include <unistd.h>
+#include <signal.h>
 
 //librerie per ROS2
 #include "rclcpp/rclcpp.hpp"
@@ -14,6 +15,18 @@
 using namespace std::chrono_literals;
 using json = nlohmann::json;
 
+/**
+ * @brief Signal handler for SIGINT
+ * @details This function is called when the program receives a SIGINT signal (CONTROL-C)
+ */
+void sigint_handler(int sig)
+{
+  LOG_ERROR_C("Caught signal " << sig);
+  tcp_close(client);
+  rclcpp::shutdown();
+  exit(0);
+}
+
 int client;
 char buffer[TCP_BUFFSIZE];
 char temp = '\0';
@@ -24,6 +37,8 @@ float last_data_angle = 0;
 
 int main(int argc, char * argv[])
 { 
+  signal(SIGINT, sigint_handler);
+
   rclcpp::init(argc, argv);
   tcp_init(client);
     
@@ -52,7 +67,7 @@ int main(int argc, char * argv[])
   while(1){
     read_data(client, buffer);
     std::string input_data = std::string(buffer);
-    LOG_DEBUG_C("Received: " + input_data);
+    LOG_DEBUG_C("Received: " );
   }
 
   // if(buffer[0] != '\0'){

@@ -34,16 +34,17 @@ void tcp_close(int& client){
 
 void read_data(int& client, char *buffer){
 
-      for(int i = 0; i < TCP_BUFFSIZE; ++i){
-        buffer[i] = '\0';
-      }
-      
-      for(int i = 0; tcp_temp_data != '\n'; ++i){
-        recv(client, &tcp_temp_data, 1, 0);
-        if(tcp_temp_data == '\n'){
-          break;
-        }
-        buffer[i] = tcp_temp_data;
-      }
-      tcp_temp_data = '\0';
+  for(int i = 0; i < TCP_BUFFSIZE; ++i){
+    buffer[i] = '\0';
+  }
+  
+  for(int i = 0; tcp_temp_data != '\n'; ++i){
+    recv(client, &tcp_temp_data, 1, 0);
+    if(tcp_temp_data == '\n'){
+      break;
+    }
+    buffer[i] = tcp_temp_data;
+  }
+  tcp_temp_data = '\0';
+  
 }
