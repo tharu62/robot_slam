@@ -1,8 +1,7 @@
 #ifndef LIDAR_PUBLISHER_HPP
 #define LIDAR_PUBLISHER_HPP
 
-#define RANGES_BUFF_SIZE 2
-
+// librerie standard
 #include <chrono>
 #include <memory>
 #include <string>
@@ -13,10 +12,13 @@
 #include "std_msgs/msg/string.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
 
+// librerie per comunicazione wireless
 #include "tcp_connection.h"
 
 //json libraries
 #include <nlohmann/json.hpp>
+
+#define RANGES_BUFF_SIZE 2
 
 using namespace std::chrono_literals;
 using json = nlohmann::json;
@@ -28,8 +30,6 @@ struct Data{
   float distance;
 };
 
-// double last_data_time=0;
-// float last_data_angle=0;
 extern int client;
 
 class Lidar_Publisher : public rclcpp::Node
@@ -54,9 +54,9 @@ class Lidar_Publisher : public rclcpp::Node
   json output_data;
 
   Lidar_Publisher()
-    : Node("minimal_publisher"), distance_{0.0}, input_data("")
+    : Node("minimal_publisher"), distance_{0.0}
     {
-      publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 200);
+      publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 20);
       timer_ = this->create_wall_timer( 1us, [this]()->void{ this->call_back(); });
     }
 
@@ -66,33 +66,25 @@ class Lidar_Publisher : public rclcpp::Node
     // start = std::chrono::system_clock::now();
 
     for(int i=0; i<RANGES_BUFF_SIZE; ++i){
-      distance_[i] = 0.0;
-      
-      buffer[0] = '\0';
 
+      distance_[i] = 0.0;
+      input_data = "";
+      for(int i=0; i < TCP_BUFFSIZE; i++){
+        buffer[i] = '\0';
+      }
+      
       for(int i = 0; temp != '\n'; i++){
-    
-        if(recv(client, &temp, 1, 0) == -1){
-          LOG_ERROR_C("Error reading data...");
-          continue;
-        }
+        recv(client, &temp, 1, 0);
         if(temp == '\n'){
           break;
         }
         buffer[i] = temp;
-        // times[i] = this->now();
       }
       temp = '\0';
 
-      
       if(buffer[0] != '\0'){
         
         input_data = buffer;
-        
-        for(int i = 0; i < TCP_BUFFSIZE; i++){
-          buffer[i] = '\0';
-        }
-        
         j = json::parse(input_data);
         
         if(i == 0){
@@ -106,15 +98,12 @@ class Lidar_Publisher : public rclcpp::Node
         
         // last_read_data.angle = j["angle"].get<float>() * 3.14/180.0;
         rpm_ = j["rpm"].get<float>();
-        
         distance_[i] = j["dist"].get<float>() / 1000.0;
         
       }else{
-        --i;
+        i--;
       }
     }
-    
-    
     
     msg_scan.header.frame_id = "laser_frame";
     msg_scan.header.stamp = this->now();
@@ -124,7 +113,7 @@ class Lidar_Publisher : public rclcpp::Node
     msg_scan.angle_increment = (last_angle - first_angle) / (float)RANGES_BUFF_SIZE;
     // msg_scan.time_increment = (float)(last_time - first_time) / (float)RANGES_BUFF_SIZE;
     msg_scan.scan_time = (float)(last_time - first_time);
-    msg_scan.range_min = 0.00;
+    msg_scan.range_min = 0.01;
     msg_scan.range_max = 5.00;
     msg_scan.ranges.assign(std::begin(distance_), std::end(distance_));
     msg_scan.intensities.assign(std::begin(distance_), std::end(distance_));

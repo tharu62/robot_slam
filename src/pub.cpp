@@ -139,6 +139,29 @@ int main(int argc, char * argv[])
           break;
       }  
       */
+
+      /*
+      switch (j["cmd"].get<int>()){
+        case 1: //start
+        output_data["cmd"] = 1;
+        output_data["data"] = 10;
+        str = output_data.dump();
+        std::strncpy(buffer, str.c_str(), sizeof(buffer) - 1);
+        buffer[sizeof(buffer) - 1] = '\0'; // Ensure null-termination
+        send(client, buffer, sizeof(buffer), 0);
+        break;
+        case 2: //stop
+        output_data["cmd"] = 2;
+        output_data["data"] = 10;
+        str = output_data.dump();
+        std::strncpy(buffer, str.c_str(), sizeof(buffer) - 1);
+        buffer[sizeof(buffer) - 1] = '\0'; // Ensure null-termination
+        send(client, buffer, sizeof(buffer), 0);
+        break;  
+        default:
+        break;
+        }  
+      */
     
     }
     
