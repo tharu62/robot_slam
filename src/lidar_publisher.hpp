@@ -56,7 +56,7 @@ class Lidar_Publisher : public rclcpp::Node
   Lidar_Publisher()
     : Node("minimal_publisher"), distance_{0.0}
     {
-      publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 20);
+      publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 200);
       timer_ = this->create_wall_timer( 1us, [this]()->void{ this->call_back(); });
     }
 
@@ -113,8 +113,8 @@ class Lidar_Publisher : public rclcpp::Node
     msg_scan.angle_increment = (last_angle - first_angle) / (float)RANGES_BUFF_SIZE;
     // msg_scan.time_increment = (float)(last_time - first_time) / (float)RANGES_BUFF_SIZE;
     msg_scan.scan_time = (float)(last_time - first_time);
-    msg_scan.range_min = 0.01;
-    msg_scan.range_max = 5.00;
+    msg_scan.range_min = 0.00;
+    msg_scan.range_max = 8.00;
     msg_scan.ranges.assign(std::begin(distance_), std::end(distance_));
     msg_scan.intensities.assign(std::begin(distance_), std::end(distance_));
     
