@@ -5,6 +5,8 @@
 #define LIDAR_BAUDRATE 115200 //transmission speed for lidar
 #define BAUDRATE 300000 //transmission speed for pc serial connection
 
+#define NO_WIFI_TRANS 0
+
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include <ArduinoJson.h>
@@ -12,6 +14,7 @@
 #include <string.h>
 #include <WiFi.h>
 #include "lidar.h"
+
 
 
 // USART 1
@@ -83,9 +86,14 @@ void loop() {
         doc["d3"] = dist_mm(buffer+8);
         doc["d4"] = dist_mm(buffer+12);
   
-        serializeJson(doc, client);
-        client.println();
-  
+        #if NO_WIFI_TRANS
+          serializeJson(doc, Serial);
+          Serial.println();
+        #else
+          serializeJson(doc, client);
+          client.println();
+        #endif
+        
         buffer[0] = 0XFA;
         buffer[1] = raw_data;
         count = 2;
