@@ -1,6 +1,8 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
+#include <iostream>
+
 #define LOG_LEVEL_C 4
 
 #if LOG_LEVEL_C >= 1
