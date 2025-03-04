@@ -18,7 +18,7 @@
 //json libraries
 #include <nlohmann/json.hpp>
 
-#define RANGES_BUFF_SIZE 2
+#define RANGES_BUFF_SIZE 4
 
 using namespace std::chrono_literals;
 using json = nlohmann::json;
@@ -26,7 +26,6 @@ using json = nlohmann::json;
 struct Data{
   int cmd;
   float angle;
-  float rpm;
   float distance;
 };
 
@@ -57,7 +56,7 @@ class Lidar_Publisher : public rclcpp::Node
     : Node("minimal_publisher"), distance_{0.0}
     {
       publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 200);
-      timer_ = this->create_wall_timer( 1us, [this]()->void{ this->call_back(); });
+      timer_ = this->create_wall_timer( 1us, [this]()->void{ this->call_back_2(); });
     }
 
   void call_back(){
@@ -97,7 +96,6 @@ class Lidar_Publisher : public rclcpp::Node
         }
         
         // last_read_data.angle = j["angle"].get<float>() * 3.14/180.0;
-        rpm_ = j["rpm"].get<float>();
         distance_[i] = j["dist"].get<float>() / 1000.0;
         
       }else{
@@ -123,6 +121,29 @@ class Lidar_Publisher : public rclcpp::Node
     // LOG_DEBUG_C("Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "ms");
   }
   
+  void call_back_2(){
+      
+    for(int i=0; i < TCP_BUFFSIZE; i++){
+      buffer[i] = '\0';
+    }
+
+    for(int i = 0; temp != '\n'; i++){
+      recv(client, &temp, 1, 0);
+      if(temp == '\n'){
+        break;
+      }
+      buffer[i] = temp;
+    }
+    temp = '\0';
+
+    if(buffer[0] != '\0'){
+      input_data = buffer;
+      j = json::parse(input_data);
+      std::cout << j.dump() << std::endl;
+    }
+
+  }
+
   private:
   rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr publisher_;

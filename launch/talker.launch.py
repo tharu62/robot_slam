@@ -22,6 +22,14 @@ def generate_launch_description():
                 parameters=[{'use_sim_time': True}]
         )
 
+        talker_node_odom = Node(
+                package='robot_slam',
+                executable='talker_odom',
+                name='talker_odom',
+                output='screen',
+                parameters=[{'use_sim_time': True}]   
+        )
+
         # These parameters are maintained for backwards compatibility
         gui_arg = DeclareLaunchArgument(name='gui', default_value='true', choices=['true', 'false'],
                 description='Flag to enable joint_state_publisher_gui')
@@ -44,7 +52,8 @@ def generate_launch_description():
         ))
 
         ld.add_action(talker_node)
-
+        # ld.add_action(talker_node_odom)
+        
         # cmd per lanciare launch file con rviz:
         # ros2 launch robot_slam talker.launch.py model:=/home/utonto/ros2_ws/src/robot_slam/description/robot.urdf.xacro
         # ros2 run joint_state_publisher_gui joint_state_publisher_gui

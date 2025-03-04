@@ -2,7 +2,7 @@
 
 char tcp_temp_data = 0;
 
-void tcp_init(int& client, int portNum){
+void tcp_init(int& client, const char* ip_add, int portNum){
 
   client = -1;
   struct sockaddr_in server_addr;
@@ -15,7 +15,7 @@ void tcp_init(int& client, int portNum){
   LOG_DEBUG_C("Socket client has been created...");
   server_addr.sin_family = AF_INET;
   server_addr.sin_port = htons(portNum);
-  server_addr.sin_addr.s_addr = inet_addr("192.168.1.185");
+  server_addr.sin_addr.s_addr = inet_addr(ip_add);
   int connection = 1;
 
   while(connection != 0){
