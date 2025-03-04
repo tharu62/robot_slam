@@ -34,6 +34,9 @@ extern int client;
 class Lidar_Publisher : public rclcpp::Node
 {
   private:
+  rclcpp::Time t1;
+  rclcpp::Time t2;
+
   double first_time = 0.0;
   double last_time = 0.0;
   float first_angle = 0.0;
@@ -55,6 +58,8 @@ class Lidar_Publisher : public rclcpp::Node
   Lidar_Publisher()
     : Node("minimal_publisher"), distance_{0.0}
     {
+      t1 = this->now();
+      t2 = this->now();
       publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 200);
       timer_ = this->create_wall_timer( 1us, [this]()->void{ this->call_back_2(); });
     }
@@ -142,19 +147,27 @@ class Lidar_Publisher : public rclcpp::Node
       //std::cout << j.dump() << std::endl;
     }
 
-    last_time = this->now().seconds();
+    t1 = this->now();
+
+    distance_[0] = j["d1"].get<float>()/1000.0;
+    distance_[1] = j["d2"].get<float>()/1000.0;
+    distance_[2] = j["d3"].get<float>()/1000.0;
+    distance_[3] = j["d4"].get<float>()/1000.0;
+
     msg_scan.header.frame_id = "laser_frame";
-    msg_scan.header.stamp = this->now();
+    msg_scan.header.stamp = t1;
     msg_scan.angle_min = 4.0*(j["ang"].get<float>() * M_PI/180.0);
     msg_scan.angle_max = 4.0*(j["ang"].get<float>() * M_PI/180.0) + 4.0*(M_PI / 180.0); 
     msg_scan.angle_increment = M_PI / 180.0;
-    msg_scan.time_increment = (float)(last_time - first_time) / 4.0;
-    msg_scan.scan_time = (float)(last_time - first_time);
+    msg_scan.time_increment = (float)(t2-t1).seconds() / 4.0;
+    msg_scan.scan_time = (float)(t2-t1).seconds();
     msg_scan.range_min = 0.00;
     msg_scan.range_max = 8.00;
     msg_scan.ranges.assign(std::begin(distance_), std::end(distance_));
     msg_scan.intensities.assign(std::begin(distance_), std::end(distance_));
-    first_time = last_time;
+    t2 = t1;
+    this->publisher_->publish(msg_scan);
+
   }
 
   private:
