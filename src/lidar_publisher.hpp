@@ -139,9 +139,22 @@ class Lidar_Publisher : public rclcpp::Node
     if(buffer[0] != '\0'){
       input_data = buffer;
       j = json::parse(input_data);
-      std::cout << j.dump() << std::endl;
+      //std::cout << j.dump() << std::endl;
     }
 
+    last_time = this->now().seconds();
+    msg_scan.header.frame_id = "laser_frame";
+    msg_scan.header.stamp = this->now();
+    msg_scan.angle_min = 4.0*(j["ang"].get<float>() * M_PI/180.0);
+    msg_scan.angle_max = 4.0*(j["ang"].get<float>() * M_PI/180.0) + 4.0*(M_PI / 180.0); 
+    msg_scan.angle_increment = M_PI / 180.0;
+    msg_scan.time_increment = (float)(last_time - first_time) / 4.0;
+    msg_scan.scan_time = (float)(last_time - first_time);
+    msg_scan.range_min = 0.00;
+    msg_scan.range_max = 8.00;
+    msg_scan.ranges.assign(std::begin(distance_), std::end(distance_));
+    msg_scan.intensities.assign(std::begin(distance_), std::end(distance_));
+    first_time = last_time;
   }
 
   private:
