@@ -18,7 +18,7 @@
 
 extern char tcp_temp_data;
 
-void tcp_init(int& client, const char* ip_add="192.168.1.185", int portNum=80);
+void tcp_init(int& client, const char* ip_add="192.168.1.129", int portNum=80);
 
 void tcp_close(int& client);
 

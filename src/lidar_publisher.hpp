@@ -18,7 +18,7 @@
 //json libraries
 #include <nlohmann/json.hpp>
 
-#define RANGES_BUFF_SIZE 20
+#define RANGES_BUFF_SIZE 90
 
 using namespace std::chrono_literals;
 using json = nlohmann::json;

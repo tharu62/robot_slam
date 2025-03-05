@@ -9,9 +9,8 @@ def generate_launch_description():
         ld = LaunchDescription()
 
         urdf_project_path = FindPackageShare('robot_slam')
-        # urdf_tutorial_path = FindPackageShare('urdf_tutorial')
         default_model_path = PathJoinSubstitution([urdf_project_path, 'description', 'robot.urdf.xacro'])
-        default_rviz_config_path = PathJoinSubstitution([urdf_project_path, 'rviz', 'urdf.rviz'])
+        default_rviz_config_path = PathJoinSubstitution(['/home/utonto/ros2_ws/src/robot_slam/rviz/urdf.rviz'])
 
         # Talk Lidar Node (avvia il publisher del lidar)
         talker_node = Node(
@@ -55,7 +54,7 @@ def generate_launch_description():
         # ld.add_action(talker_node_odom)
         
         # cmd per lanciare launch file con rviz:
-        # ros2 launch robot_slam talker.launch.py model:=/home/utonto/ros2_ws/src/robot_slam/description/robot.urdf.xacro
+        # ros2 launch robot_slam talker.launch.py model:=/home/utonto/ros2_ws/src/robot_slam/description/robot.urdf.xacro rvizconfig:=/mnt/c/Users/yehan/Documenti/robot_slam/rviz/urdf.rviz
         # ros2 run joint_state_publisher_gui joint_state_publisher_gui
         
         return ld
