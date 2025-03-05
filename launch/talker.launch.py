@@ -9,7 +9,7 @@ def generate_launch_description():
         ld = LaunchDescription()
 
         urdf_project_path = FindPackageShare('robot_slam')
-        default_model_path = PathJoinSubstitution([urdf_project_path, 'description', 'robot.urdf.xacro'])
+        default_model_path = PathJoinSubstitution(['/home/utonto/ros2_ws/src/robot_slam/description/robot.urdf.xacro'])
         default_rviz_config_path = PathJoinSubstitution(['/home/utonto/ros2_ws/src/robot_slam/rviz/urdf.rviz'])
 
         # Talk Lidar Node (avvia il publisher del lidar)
