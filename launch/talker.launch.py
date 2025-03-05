@@ -5,12 +5,18 @@ from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
 
+import os
+
+robot_slam_dir = os.path.dirname(os.path.abspath(__file__)+"/../")
+model_path_dir = robot_slam_dir + "/description/robot.urdf.xacro"
+rviz_config_path_dir = robot_slam_dir + "/rviz/urdf.rviz"
+
 def generate_launch_description():
         ld = LaunchDescription()
 
         urdf_project_path = FindPackageShare('robot_slam')
-        default_model_path = PathJoinSubstitution(['/home/utonto/ros2_ws/src/robot_slam/description/robot.urdf.xacro'])
-        default_rviz_config_path = PathJoinSubstitution(['/home/utonto/ros2_ws/src/robot_slam/rviz/urdf.rviz'])
+        default_model_path = PathJoinSubstitution([urdf_project_path, 'description', 'robot.urdf.xacro'])
+        default_rviz_config_path = PathJoinSubstitution([urdf_project_path, 'rviz', 'urdf.rviz'])
 
         # Talk Lidar Node (avvia il publisher del lidar)
         talker_node = Node(
@@ -58,3 +64,7 @@ def generate_launch_description():
         # ros2 run joint_state_publisher_gui joint_state_publisher_gui
         
         return ld
+
+
+if __name__ == '__main__':
+        print(robot_slam_dir)
