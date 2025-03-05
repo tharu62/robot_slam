@@ -39,12 +39,14 @@ def generate_launch_description():
         gui_arg = DeclareLaunchArgument(name='gui', default_value='true', choices=['true', 'false'],
                 description='Flag to enable joint_state_publisher_gui')
         ld.add_action(gui_arg)
-        rviz_arg = DeclareLaunchArgument(name='rvizconfig', default_value=default_rviz_config_path,
+        #rviz_arg = DeclareLaunchArgument(name='rvizconfig', default_value=default_rviz_config_path,
+        rviz_arg = DeclareLaunchArgument(name='rvizconfig', default_value='/home/utonto/ros2_ws/src/robot_slam/rviz/urdf.rviz',
                 description='Absolute path to rviz config file')
         ld.add_action(rviz_arg)
 
         # This parameter has changed its meaning slightly from previous versions
-        ld.add_action(DeclareLaunchArgument(name='model', default_value=str(default_model_path),
+        #ld.add_action(DeclareLaunchArgument(name='model', default_value=str(default_model_path),
+        ld.add_action(DeclareLaunchArgument(name='model', default_value='/home/utonto/ros2_ws/src/robot_slam/description/robot.urdf.xacro',
                 description='Path to robot urdf file relative to robot_slam package'))
 
         ld.add_action(IncludeLaunchDescription(
