@@ -17,14 +17,34 @@ the data sent is structured as:
 
 The data has structure:
 
-| HEADER | Angle | Rpm | Data 1 | Data 2 | Data 3 | Data 4 | Checksum |
-| ------ | ----- | --- | ------ | ------ | ------ | ------ | -------- |
-| 1 byte | 2 byte | 2 byte | 4 byte | 4 byte | 4 byte | 4 byte | 2 byte |
-| constant 0xfa | from 0Xa0 to 0xfa | float | Data Structure | Data Structure | Data Structure | Data Structure | int |
+|   | **HEADER**    | **ANGLE[Grad]**   | **RPM** | **DATA 1**     | **DATA 2**     | **DATA 2**     | **DATA 4**     | **CHECKSUM** |   |
+|---|---------------|-------------------|---------|----------------|----------------|----------------|----------------|--------------|---|
+|   | 1 byte        | 2 byte            | 2 byte  | 4 byte         | 4 byte         | 4 byte         | 4 byte         | 2 byte       |   |
+|   | constant **0xfa** | from **0xa0** to **0xfa** | float   | Data Structure | Data Structure | Data Structure | Data Structure | int          |   |
 
-## Data Strucure
+### HEADER
 
-the data is composed of a distance in mm and a signal strength
+The header is a constat value always sent at the start of a scan message
 
-| Data |
+### ANGLE
+
+The angle is in a range from 0 to 89 degrees (90 tot). Every scan message is composed of 4 scanned angles: 
+taken **i** as the angle given by the message the actual angles measured are: {4***i**, 4***i**+1, 4***i**+2, 4***i**+3}
+
+### RPM
+
+The Lidar returns the rpm measured as a float value: 
+
+in c/c++:
+
+float(packet[2] | ((packet[3]<<8))) / 64.f;
+
+### Data Strucure
+
+The data is composed of a distance in mm and a signal strength
+
+**Data:**
+
+| first 2 bytes | last 2 bytes |
+
 | distance | signal strength |

@@ -5,7 +5,16 @@
 #define LIDAR_BAUDRATE 115200 //transmission speed for lidar
 #define BAUDRATE 300000 //transmission speed for pc serial connection
 
-#define NO_WIFI_TRANS 0
+// specifications for data transmission
+// DON'T CHANGE THE VALUES
+#define SERIAL_ONLY 0
+#define WIFI_ONLY 1
+#define WIFI_AND_SERIAL 2
+
+// choose transmission type
+// #define TRANSMISSION_TYPE SERIAL_ONLY
+// #define TRANSMISSION_TYPE WIFI_ONLY
+#define TRANSMISSION_TYPE WIFI_AND_SERIAL
 
 #include <Arduino.h>
 #include <HardwareSerial.h>
@@ -14,7 +23,6 @@
 #include <string.h>
 #include <WiFi.h>
 #include "lidar.h"
-
 
 
 // USART 1
@@ -39,6 +47,7 @@ void setup(){
   
   Serial.println("");
 
+  #if TRANSMISSION_TYPE == WIFI_ONLY || TRANSMISSION_TYPE == WIFI_AND_SERIAL
   // initialise wifi connection
   Serial.println("Connecting to Wifi...");
   Serial.printf("SSID: %s\n",ssid);
@@ -54,11 +63,13 @@ void setup(){
   Serial.println(WiFi.localIP());
 
   server.begin();
-  
+  #endif
+
   // ensure TXPIN is only for receiving data
   pinMode(TXPIN, INPUT);
   Lidar.begin(LIDAR_BAUDRATE, SERIAL_8N1, RXPIN, TXPIN);
 
+  #if TRANSMISSION_TYPE == WIFI_ONLY || TRANSMISSION_TYPE == WIFI_AND_SERIAL
   // client connection
   Serial.println("Waiting for client connection...");
   client = server.available();
@@ -66,46 +77,60 @@ void setup(){
     client = server.available();
   }
   Serial.println("Client connected");  
+  #endif
+
 }
 
 void loop() {
+
+  #if TRANSMISSION_TYPE == WIFI_ONLY || TRANSMISSION_TYPE == WIFI_AND_SERIAL
   if(client){
+  #endif
+  
     if(Lidar.read(&temp, 1)){
-  
-      raw_data_old = raw_data;
-      raw_data = temp;
-      
-      // if end of packet is reached
-      if(raw_data_old == 0XFA && raw_data <= 0XF9 && raw_data >= 0XA0){
+    
+        raw_data_old = raw_data;
+        raw_data = temp;
         
-        // print_data(buffer);
-        
-        doc["ang"] = angle(buffer);
-        doc["d1"] = dist_mm(buffer);
-        doc["d2"] = dist_mm(buffer+4);
-        doc["d3"] = dist_mm(buffer+8);
-        doc["d4"] = dist_mm(buffer+12);
-  
-        #if NO_WIFI_TRANS
-          serializeJson(doc, Serial);
-          Serial.println();
-        #else
-          serializeJson(doc, client);
-          client.println();
-        #endif
-        
-        buffer[0] = 0XFA;
-        buffer[1] = raw_data;
-        count = 2;
-        return;
+        // if end of packet is reached
+        if(raw_data_old == 0XFA && raw_data <= 0XF9 && raw_data >= 0XA0){
+          
+          // print_data(buffer);
+          
+          doc["ang"] = angle(buffer);
+          doc["d1"] = dist_mm(buffer);
+          doc["d2"] = dist_mm(buffer+4);
+          doc["d3"] = dist_mm(buffer+8);
+          doc["d4"] = dist_mm(buffer+12);
+    
+          #if TRANSMISSION_TYPE == SERIAL_ONLY
+            serializeJson(doc, Serial);
+            Serial.println();
+          #elif TRANSMISSION_TYPE == WIFI_ONLY
+            serializeJson(doc, client); 
+            client.println();
+          #elif TRANSMISSION_TYPE == WIFI_AND_SERIAL
+            serializeJson(doc, Serial);
+            Serial.println();
+            serializeJson(doc, client);
+            client.println();
+          #endif
+          
+          buffer[0] = 0XFA;
+          buffer[1] = raw_data;
+          count = 2;
+          return;
+        }
+    
+        if(count <= 22){
+          buffer[count] = raw_data;
+          count++;
+        }
       }
-  
-      if(count <= 22){
-        buffer[count] = raw_data;
-        count++;
-      }
-    }
+    
+  #if TRANSMISSION_TYPE == WIFI_ONLY || TRANSMISSION_TYPE == WIFI_AND_SERIAL
   }else{
     client = server.available();
   }
+  #endif
 }
