@@ -1,4 +1,3 @@
-import os
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
@@ -6,18 +5,10 @@ from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.substitutions import FindPackageShare
 
-# automagically find the path of the robot.urdf.xacro and urdf.rviz files
-robot_slam_dir = os.path.dirname(os.path.abspath(__file__)+'/../')  # path to the robot_slam package
-model_path_dir = robot_slam_dir + '/description/robot.urdf.xacro'
-rviz_config_path_dir = robot_slam_dir + '/rviz/urdf.rviz'
-
 
 def generate_launch_description():
+        
         ld = LaunchDescription()
-
-        urdf_project_path = FindPackageShare('robot_slam')
-        default_model_path = PathJoinSubstitution([urdf_project_path, 'description', 'robot.urdf.xacro'])
-        default_rviz_config_path = PathJoinSubstitution([urdf_project_path, 'rviz', 'urdf.rviz'])
 
         # Talk Lidar Node (avvia il publisher del lidar)
         talker_node = Node(
@@ -41,13 +32,13 @@ def generate_launch_description():
                 description='Flag to enable joint_state_publisher_gui')
         ld.add_action(gui_arg)
         #rviz_arg = DeclareLaunchArgument(name='rvizconfig', default_value=default_rviz_config_path,
-        rviz_arg = DeclareLaunchArgument(name='rvizconfig', default_value=rviz_config_path_dir,
+        rviz_arg = DeclareLaunchArgument(name='rvizconfig', default_value=None,
                 description='Absolute path to rviz config file')
         ld.add_action(rviz_arg)
 
         # This parameter has changed its meaning slightly from previous versions
         #ld.add_action(DeclareLaunchArgument(name='model', default_value=str(default_model_path),
-        ld.add_action(DeclareLaunchArgument(name='model', default_value=model_path_dir,
+        ld.add_action(DeclareLaunchArgument(name='model', default_value=None,
                 description='Path to robot urdf file relative to robot_slam package'))
 
         ld.add_action(IncludeLaunchDescription(
@@ -67,9 +58,3 @@ def generate_launch_description():
         # ros2 run joint_state_publisher_gui joint_state_publisher_gui
         
         return ld
-
-
-if __name__ == '__main__':
-        print(robot_slam_dir)
-        print(model_path_dir)
-        print(rviz_config_path_dir)
