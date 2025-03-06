@@ -93,12 +93,13 @@ class Lidar_Publisher : public rclcpp::Node
 
         }catch(nlohmann::detail::parse_error &e){
 
-          // LOG_ERROR_C("Received: " << raw_data_buffer.data());
           LOG_ERROR_C("Error parsing json: " << e.what());
+          LOG_ERROR_C("Received: " << raw_data_buffer.data());
           raw_data_buffer.clear();
           intensities.clear();
           ranges.clear();
           angles.clear();
+          time_a = this->now().seconds();
           continue;
         }
 
@@ -109,6 +110,7 @@ class Lidar_Publisher : public rclcpp::Node
           intensities.clear();
           ranges.clear();
           angles.clear();
+          time_a = this->now().seconds();
           continue;
         }
 
@@ -119,6 +121,7 @@ class Lidar_Publisher : public rclcpp::Node
           intensities.clear();
           ranges.clear();
           angles.clear();
+          time_a = this->now().seconds();
           continue;
         }
 
