@@ -4,6 +4,16 @@
 #include <HardwareSerial.h>
 #include <iostream>
 
+void dump_packet(unsigned char* packet){
+
+    for(int i=0; i<22; ++i){
+        Serial.print(packet[i],HEX);
+        Serial.print(" ");
+    }
+    Serial.println();
+
+}
+
 int angle(unsigned char *packet) { // 22 bytes in the packet
     return packet[1] - 0xA0; // 16 bits for the angle
 }
