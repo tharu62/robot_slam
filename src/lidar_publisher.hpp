@@ -180,8 +180,8 @@ class Lidar_Publisher : public rclcpp::Node
     
     unsigned int len;
     for(int i = 0; temp != '\n'; i++){
-      recv(client, &temp, 1, 0);
-      recvfrom(client, &temp, 1, MSG_WAITALL, (struct sockaddr *) &server_addr, &len);
+      //recv(client, &temp, 1, 0);
+      recvfrom(client, &temp, 1, MSG_PEEK, (struct sockaddr *) &server_addr, &len);
       if(temp == '\n'){
         break;
       }

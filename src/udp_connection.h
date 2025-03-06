@@ -18,7 +18,7 @@
 
 extern char udp_temp_data;
 
-void udp_init(int& client, const char* ip_add="192.168.1.185", int portNum=80);
+void udp_init(int& client, const char* ip_add="192.168.1.162", int portNum=80);
 
 void udp_close(int& client);
 

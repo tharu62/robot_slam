@@ -19,7 +19,7 @@ void udp_init(int& client, const char* ip_add, int portNum){
   server_addr.sin_addr.s_addr = inet_addr(ip_add);
 
   sendto(client, (const char *)hello, strlen(hello), MSG_CONFIRM, (const struct sockaddr *) &server_addr,  sizeof(server_addr));
-  LOG_DEBUG_C("Connection confirmed...");
+  LOG_DEBUG_C("First message sent...");
 }
 
 void udp_close(int& client){
