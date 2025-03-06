@@ -42,12 +42,12 @@ class Lidar_Publisher : public rclcpp::Node
   float first_angle = 0.0;
   float last_angle = 0.0;
   float rpm_ = 0.0;
-  float distance_[RANGES_BUFF_SIZE*4];
+  float distance_[90];
   json j;
 
   public:
   sensor_msgs::msg::LaserScan msg_scan = sensor_msgs::msg::LaserScan();
-  char buffer[TCP_BUFFSIZE];
+  char buffer[1000];
   rclcpp::Time times[TCP_BUFFSIZE];
 
   char temp;
@@ -128,59 +128,46 @@ class Lidar_Publisher : public rclcpp::Node
   
   void call_back_2(){
 
-    for(int i=0; i<RANGES_BUFF_SIZE; i++){
-      input_data = "";
-      distance_[i] = 0.0;
-      for(int i=0; i < TCP_BUFFSIZE; i++){
-        buffer[i] = '\0';
+    //first_time = this->now().seconds();
+    input_data = "";
+    for(int i=0; i < 1000; i++){
+      buffer[i] = '\0';
+    }
+    
+    for(int i = 0; temp != '\n'; i++){
+      recv(client, &temp, 1, 0);
+      if(temp == '\n'){
+        break;
       }
-  
-      for(int i = 0; temp != '\n'; i++){
-        recv(client, &temp, 1, 0);
-        if(temp == '\n'){
-          break;
-        }
-        buffer[i] = temp;
-      }
-      temp = '\0';
-      
-      
-      if(buffer[0] != '\0'){
-        input_data = buffer;
-        
-        j = json::parse(input_data);
-        // std::cout << input_data << std::endl;
-        
-        distance_[0+(i*4)] = j["d1"].get<float>()/1000.0;
-        distance_[1+(i*4)] = j["d2"].get<float>()/1000.0;
-        distance_[2+(i*4)] = j["d3"].get<float>()/1000.0;
-        distance_[3+(i*4)] = j["d4"].get<float>()/1000.0;
-        
-        if(i == 0){
-          first_angle = j["ang"].get<float>() * M_PI/180.0;
-          first_time = this->now().seconds();
-        }
-        if(i == RANGES_BUFF_SIZE-1){
-          last_angle = j["ang"].get<float>() * M_PI/180.0;
-          last_time = this->now().seconds();
-        }
-      }
+      buffer[i] = temp;
+    }
+    temp = '\0';
+    
+    input_data = buffer;
+    ///std::cout << input_data << std::endl;
+    j = json::parse(input_data);
+    
+    for(int i=0; i<90; i++){
+      distance_[i] = j["data"][i].get<float>()/1000.0;
+    }
 
-    }    
-
+    //last_time = this->now().seconds();
+    first_time = this->now().seconds();
     msg_scan.header.frame_id = "laser_frame";
     msg_scan.header.stamp = this->now();
-    msg_scan.angle_min = first_angle;
-    msg_scan.angle_max = last_angle; 
-    msg_scan.angle_increment = M_PI / 180.0;
-    msg_scan.time_increment = (float)(last_time - first_time) / (float)(RANGES_BUFF_SIZE*4);
-    msg_scan.scan_time = (float)(last_time - first_time);
+    msg_scan.angle_min = 0.0;
+    msg_scan.angle_max = 6.28319; 
+    msg_scan.angle_increment = (float) (4*M_PI / 180.0);
+    msg_scan.time_increment = (last_time - first_time) / 90.0;
+    msg_scan.scan_time = (last_time - first_time);
+    // msg_scan.time_increment = (float) (0.255)/360.0;
+    // msg_scan.scan_time = (float) 0.255;
     msg_scan.range_min = 0.00;
     msg_scan.range_max = 5.00;
     msg_scan.ranges.assign(std::begin(distance_), std::end(distance_));
     msg_scan.intensities.assign(std::begin(distance_), std::end(distance_));
-    this->publisher_->publish(msg_scan);
-
+    this->publisher_->publish(msg_scan); 
+    last_time = first_time;
   }
 
   private:
