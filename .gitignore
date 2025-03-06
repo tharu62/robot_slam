@@ -1,6 +1,8 @@
 .gitignore
-build/*
 .vscode
-launch.bash
+build/*
 install/*
 log
+launch.bash
+setup.bash
+rviz/urdf.rviz
