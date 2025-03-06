@@ -30,6 +30,7 @@ struct Data{
 };
 
 extern int client;
+extern struct sockaddr_in server_addr;
 
 class Lidar_Publisher : public rclcpp::Node
 {
@@ -61,7 +62,7 @@ class Lidar_Publisher : public rclcpp::Node
       t1 = this->now();
       t2 = this->now();
       publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 200);
-      timer_ = this->create_wall_timer( 1us, [this]()->void{ this->call_back_2(); });
+      timer_ = this->create_wall_timer( 1us, [this]()->void{ this->call_back_3(); });
     }
 
   void call_back(){
@@ -168,6 +169,50 @@ class Lidar_Publisher : public rclcpp::Node
     msg_scan.intensities.assign(std::begin(distance_), std::end(distance_));
     this->publisher_->publish(msg_scan); 
     last_time = first_time;
+  }
+
+  void call_back_3(){
+    first_time = this->now().seconds();
+    input_data = "";
+    for(int i=0; i < 1000; i++){
+      buffer[i] = '\0';
+    }
+    
+    unsigned int len;
+    for(int i = 0; temp != '\n'; i++){
+      recv(client, &temp, 1, 0);
+      recvfrom(client, &temp, 1, MSG_WAITALL, (struct sockaddr *) &server_addr, &len);
+      if(temp == '\n'){
+        break;
+      }
+      buffer[i] = temp;
+    }
+    temp = '\0';
+    
+    input_data = buffer;
+    LOG_DEBUG_C(input_data);
+    // j = json::parse(input_data);
+    
+    // std::vector<float> vec;
+    // vec.push_back(j["d1"].get<float>()/1000.0);
+    // vec.push_back(j["d2"].get<float>()/1000.0);
+
+    // first_time = this->now().seconds();
+    // msg_scan.header.frame_id = "laser_frame";
+    // msg_scan.header.stamp = this->now();
+    // msg_scan.angle_min =  j["ang"].get<float>()*(M_PI / 180.0);
+    // msg_scan.angle_max = (j["ang"].get<float>()+1)*(M_PI / 180.0); 
+    // msg_scan.angle_increment = (float) (M_PI / 180.0);
+    // msg_scan.time_increment = (last_time - first_time);
+    // msg_scan.scan_time = (last_time - first_time);
+    // msg_scan.range_min = 0.00;
+    // msg_scan.range_max = 5.00;
+    // msg_scan.ranges = vec;
+    // msg_scan.intensities = vec;
+    // this->publisher_->publish(msg_scan); 
+    // last_time = first_time;
+    // vec.clear();
+
   }
 
   private:

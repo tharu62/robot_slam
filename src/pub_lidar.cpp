@@ -11,6 +11,7 @@
 
 #include "lidar_publisher.hpp"
 #include "tcp_connection.h"
+#include "udp_connection.h"
 
 using namespace std::chrono_literals;
 using json = nlohmann::json;
@@ -35,7 +36,8 @@ int main(int argc, char * argv[])
   signal(SIGINT, sigint_handler);
   
   rclcpp::init(argc, argv);
-  tcp_init(client); 
+  //tcp_init(client);
+  udp_init(client); 
   auto pub_node = std::make_shared<Lidar_Publisher>();
   rclcpp::spin(pub_node);
   
