@@ -14,9 +14,9 @@
 #define PACKET_SIZE 90
 
 // choose transmission type
-// #define TRANSMISSION_TYPE SERIAL_ONLY
+#define TRANSMISSION_TYPE SERIAL_ONLY
 // #define TRANSMISSION_TYPE WIFI_ONLY
-#define TRANSMISSION_TYPE WIFI_AND_SERIAL
+// #define TRANSMISSION_TYPE WIFI_AND_SERIAL
 
 #include <Arduino.h>
 #include <HardwareSerial.h>
@@ -39,7 +39,7 @@ uint8_t raw_data_old=0;
 int count = 0;
 JsonDocument doc;
 
-// JsonArray ang = doc["ang"].to<JsonArray>();
+JsonArray ang = doc["ang"].to<JsonArray>();
 JsonArray d1 = doc["data"].to<JsonArray>();
 
 
@@ -102,11 +102,11 @@ void loop() {
       // if end of packet is reached
       if(raw_data_old == 0XFA && raw_data <= 0XF9 && raw_data >= 0XA0){
 
-        // ang.add(angle(buffer));
+        ang.add(angle(buffer));
         d1.add(dist_mm(buffer+4));
-        // d1.add(dist_mm(buffer+8));
-        // d1.add(dist_mm(buffer+12));
-        // d1.add(dist_mm(buffer+16));
+        d1.add(dist_mm(buffer+8));
+        d1.add(dist_mm(buffer+12));
+        d1.add(dist_mm(buffer+16));
 
         packet_counter++;
         
@@ -121,7 +121,7 @@ void loop() {
           client.println();
           #endif
           
-          // ang.clear();
+          ang.clear();
           d1.clear();
           packet_counter = 0;
         }

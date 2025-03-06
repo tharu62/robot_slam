@@ -1,5 +1,6 @@
 .gitignore
 build/*
 .vscode
+launch.bash
 install/*
 log
