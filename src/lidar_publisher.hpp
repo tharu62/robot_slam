@@ -18,16 +18,10 @@
 //json libraries
 #include <nlohmann/json.hpp>
 
-#define RANGES_BUFF_SIZE 90
+#define BUFF_SIZE 20
 
 using namespace std::chrono_literals;
 using json = nlohmann::json;
-
-struct Data{
-  int cmd;
-  float angle;
-  float distance;
-};
 
 extern int client;
 extern struct sockaddr_in server_addr;
@@ -35,183 +29,118 @@ extern struct sockaddr_in server_addr;
 class Lidar_Publisher : public rclcpp::Node
 {
   private:
-  rclcpp::Time t1;
-  rclcpp::Time t2;
-
   double first_time = 0.0;
   double last_time = 0.0;
-  float first_angle = 0.0;
-  float last_angle = 0.0;
-  float rpm_ = 0.0;
-  float distance_[90];
-  json j;
 
   public:
   sensor_msgs::msg::LaserScan msg_scan = sensor_msgs::msg::LaserScan();
-  char buffer[1000];
-  rclcpp::Time times[TCP_BUFFSIZE];
-
-  char temp;
-  std::string input_data;
-  std::string str;
-  json output_data;
+  char buffer[BUFF_SIZE];
 
   Lidar_Publisher()
-    : Node("minimal_publisher"), distance_{0.0}
+    : Node("minimal_publisher")
     {
-      t1 = this->now();
-      t2 = this->now();
-      publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 200);
-      timer_ = this->create_wall_timer( 1us, [this]()->void{ this->call_back_3(); });
+      publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 20);
+      timer_ = this->create_wall_timer( 0ms, [this]()->void{ this->call_back_2(); });
     }
 
-  void call_back(){
+  // void call_back(){
+  //   for(int i=0; i<RANGES_BUFF_SIZE; ++i){
+  //     distance_[i] = 0.0;
+  //     input_data = "";
+  //     for(int i=0; i < TCP_BUFFSIZE; i++){
+  //       buffer[i] = '\0';
+  //     }      
+  //     for(int i = 0; temp != '\n'; i++){
+  //       recv(client, &temp, 1, 0);
+  //       if(temp == '\n'){
+  //         break;
+  //       }
+  //       buffer[i] = temp;
+  //     }
+  //     temp = '\0';
+  //     if(buffer[0] != '\0'){        
+  //       input_data = buffer;
+  //       j = json::parse(input_data);        
+  //       if(i == 0){
+  //         first_angle = j["angle"].get<float>() * M_PI/180.0;
+  //         first_time = this->now().seconds();
+  //       }
+  //       if(i == RANGES_BUFF_SIZE-1){
+  //         last_angle = j["angle"].get<float>() * M_PI/180.0;
+  //         last_time = this->now().seconds();
+  //       }
+  //       distance_[i] = j["dist"].get<float>() / 1000.0;      
+  //     }else{
+  //       i--;
+  //     }
+  //   }  
+  //   msg_scan.header.frame_id = "laser_frame";
+  //   msg_scan.header.stamp = this->now();
+  //   msg_scan.angle_min = first_angle;
+  //   msg_scan.angle_max = last_angle; 
+  //   msg_scan.angle_increment = M_PI / 180.0;
+  //   msg_scan.time_increment = (float)(last_time - first_time) / (float)RANGES_BUFF_SIZE;
+  //   msg_scan.scan_time = (float)(last_time - first_time);
+  //   msg_scan.range_min = 0.00;
+  //   msg_scan.range_max = 8.00;
+  //   msg_scan.ranges.assign(std::begin(distance_), std::end(distance_));
+  //   msg_scan.intensities.assign(std::begin(distance_), std::end(distance_)); 
+  //   this->publisher_->publish(msg_scan);
+  // }
 
-    // std::chrono::time_point<std::chrono::system_clock> start, end;
-    // start = std::chrono::system_clock::now();
-
-    for(int i=0; i<RANGES_BUFF_SIZE; ++i){
-
-      distance_[i] = 0.0;
-      input_data = "";
-      for(int i=0; i < TCP_BUFFSIZE; i++){
-        buffer[i] = '\0';
-      }
-      
-      for(int i = 0; temp != '\n'; i++){
-        recv(client, &temp, 1, 0);
-        if(temp == '\n'){
-          break;
-        }
-        buffer[i] = temp;
-      }
-      temp = '\0';
-
-      if(buffer[0] != '\0'){
-        
-        input_data = buffer;
-        j = json::parse(input_data);
-        
-        if(i == 0){
-          first_angle = j["angle"].get<float>() * M_PI/180.0;
-          first_time = this->now().seconds();
-        }
-        if(i == RANGES_BUFF_SIZE-1){
-          last_angle = j["angle"].get<float>() * M_PI/180.0;
-          last_time = this->now().seconds();
-        }
-        
-        // last_read_data.angle = j["angle"].get<float>() * 3.14/180.0;
-        distance_[i] = j["dist"].get<float>() / 1000.0;
-        
-      }else{
-        i--;
-      }
-    }
-    
-    msg_scan.header.frame_id = "laser_frame";
-    msg_scan.header.stamp = this->now();
-    msg_scan.angle_min = first_angle;
-    msg_scan.angle_max = last_angle; 
-    msg_scan.angle_increment = M_PI / 180.0;
-    // msg_scan.angle_increment = (last_angle - first_angle) / (float)RANGES_BUFF_SIZE;
-    msg_scan.time_increment = (float)(last_time - first_time) / (float)RANGES_BUFF_SIZE;
-    msg_scan.scan_time = (float)(last_time - first_time);
-    msg_scan.range_min = 0.00;
-    msg_scan.range_max = 8.00;
-    msg_scan.ranges.assign(std::begin(distance_), std::end(distance_));
-    msg_scan.intensities.assign(std::begin(distance_), std::end(distance_));
-    
-    this->publisher_->publish(msg_scan);
-    // end = std::chrono::system_clock::now();
-    // LOG_DEBUG_C("Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << "ms");
-  }
-  
   void call_back_2(){
-
-    //first_time = this->now().seconds();
-    input_data = "";
-    for(int i=0; i < 1000; i++){
-      buffer[i] = '\0';
-    }
-    
-    for(int i = 0; temp != '\n'; i++){
-      recv(client, &temp, 1, 0);
-      if(temp == '\n'){
-        break;
-      }
-      buffer[i] = temp;
-    }
-    temp = '\0';
-    
-    input_data = buffer;
-    ///std::cout << input_data << std::endl;
-    j = json::parse(input_data);
-    
-    for(int i=0; i<90; i++){
-      distance_[i] = j["data"][i].get<float>()/1000.0;
-    }
-
-    //last_time = this->now().seconds();
-    first_time = this->now().seconds();
-    msg_scan.header.frame_id = "laser_frame";
-    msg_scan.header.stamp = this->now();
-    msg_scan.angle_min = 0.0;
-    msg_scan.angle_max = 6.28319; 
-    msg_scan.angle_increment = (float) (4*M_PI / 180.0);
-    msg_scan.time_increment = (last_time - first_time) / 90.0;
-    msg_scan.scan_time = (last_time - first_time);
-    // msg_scan.time_increment = (float) (0.255)/360.0;
-    // msg_scan.scan_time = (float) 0.255;
-    msg_scan.range_min = 0.00;
-    msg_scan.range_max = 5.00;
-    msg_scan.ranges.assign(std::begin(distance_), std::end(distance_));
-    msg_scan.intensities.assign(std::begin(distance_), std::end(distance_));
-    this->publisher_->publish(msg_scan); 
-    last_time = first_time;
-  }
-
-  void call_back_3(){
-    first_time = this->now().seconds();
-    input_data = "";
-    for(int i=0; i < 1000; i++){
-      buffer[i] = '\0';
-    }
     
     unsigned int len;
-    for(int i = 0; temp != '\n'; i++){
-      //recv(client, &temp, 1, 0);
-      recvfrom(client, &temp, 1, MSG_PEEK, (struct sockaddr *) &server_addr, &len);
-      if(temp == '\n'){
-        break;
-      }
-      buffer[i] = temp;
-    }
-    temp = '\0';
-    
-    input_data = buffer;
-    LOG_DEBUG_C(input_data);
-    // j = json::parse(input_data);
-    
-    // std::vector<float> vec;
-    // vec.push_back(j["d1"].get<float>()/1000.0);
-    // vec.push_back(j["d2"].get<float>()/1000.0);
+    std::vector<float> vec;
+    std::string angle_;
+    std::string dist_;
+    std::string test;
 
-    // first_time = this->now().seconds();
-    // msg_scan.header.frame_id = "laser_frame";
-    // msg_scan.header.stamp = this->now();
-    // msg_scan.angle_min =  j["ang"].get<float>()*(M_PI / 180.0);
-    // msg_scan.angle_max = (j["ang"].get<float>()+1)*(M_PI / 180.0); 
-    // msg_scan.angle_increment = (float) (M_PI / 180.0);
-    // msg_scan.time_increment = (last_time - first_time);
-    // msg_scan.scan_time = (last_time - first_time);
-    // msg_scan.range_min = 0.00;
-    // msg_scan.range_max = 5.00;
-    // msg_scan.ranges = vec;
-    // msg_scan.intensities = vec;
-    // this->publisher_->publish(msg_scan); 
-    // last_time = first_time;
-    // vec.clear();
+    for(int i=0; i < 20; i++){
+      buffer[i] = '\0';
+    }
+    recvfrom(client, buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr *) &server_addr, &len);
+    first_time = this->now().seconds();
+
+    int d_indx=0;
+    for(int i=0; i<(int)sizeof(buffer); ++i){
+      if(buffer[i] == 'd') d_indx = i;
+    }
+
+    test = std::string(buffer);
+    angle_ = test.substr(1,d_indx-1);
+    dist_ = test.substr(d_indx+1, sizeof(buffer));
+    vec.push_back((float) stof(dist_)/1000.0);
+    msg_scan.angle_min = (float) stof(angle_)*M_PI / 180.0;
+    
+    for(int i=0; i < 20; i++){
+      buffer[i] = '\0';
+    }
+    recvfrom(client, buffer, sizeof(buffer), MSG_WAITALL, (struct sockaddr *) &server_addr, &len);
+    last_time = this->now().seconds();
+
+    d_indx=0;
+    for(int i=0; i<(int)sizeof(buffer); ++i){
+      if(buffer[i] == 'd') d_indx = i;
+    }
+
+    test = std::string(buffer);
+    angle_ = test.substr(1,d_indx-1);
+    dist_ = test.substr(d_indx+1, sizeof(buffer));
+    vec.push_back((float) stof(dist_)/1000.0);
+    msg_scan.angle_max = (float) stof(angle_)*M_PI / 180.0;
+
+    msg_scan.header.frame_id = "laser_frame";
+    msg_scan.header.stamp = this->now();
+    msg_scan.angle_increment = (float) (msg_scan.angle_max - msg_scan.angle_min);
+    msg_scan.time_increment = (float) (last_time - first_time);
+    msg_scan.scan_time = (float) (last_time - first_time);
+    msg_scan.range_min = 0.00;
+    msg_scan.range_max = 3.00;
+    msg_scan.ranges = vec;
+    msg_scan.intensities = vec;
+    this->publisher_->publish(msg_scan); 
+    vec.clear();
 
   }
 
