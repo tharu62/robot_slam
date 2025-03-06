@@ -1,5 +1,7 @@
 # LDS01RR LIDAR DATA STRUCTURE
 
+https://github.com/user-attachments/assets/adeb7e57-0af2-43ff-b6a1-c8d1a08f5a2c
+
 This is a Lidar Sersor from a Roborock vacuum cleaner. In this page we try to unravel the working principles for the ones that would like to use it in their project.
 
 Data is sent through UART transmission at 115200 baud rate.
