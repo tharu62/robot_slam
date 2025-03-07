@@ -107,3 +107,6 @@ bool verify_packet_checksum(unsigned char *packet) { // 22 bytes in the packet
     return packet[20]+(packet[21]<<8) == (((checksum32 & 0x7FFF) + (checksum32 >> 15)) & 0x7FFF);
 }
 ```
+
+## ROS Compatibility
+
