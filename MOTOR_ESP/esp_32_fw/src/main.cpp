@@ -6,10 +6,16 @@
  * 
  */
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <HardwareSerial.h>
 #include <WiFi.h>
+#include <vector>
+#include <string>
+
+#include "encoders.h"
 
 #define TX_PIN 17
 #define RX_PIN 16
@@ -26,8 +32,48 @@ WiFiClient client;
 extern const char* ssid;
 extern const char* password;
 
+int expected = 7000;
+
+float kp=0.1;
+float ki=0.01;
+float kd=0.01;
+
+float proportional=0.0;
+float integral=0.0;
+int derivative=0.0;
+float error=0.0;
+float last_error=0.0;
+
+void periodic_counter_print(void *pvParameters){
+  while(1){
+    Serial.println(m1_count);
+    delay(100);
+
+  }
+}
+
+void pid_func(void *pvParameters) {
+
+  error = (float)(expected - m1_count);
+  proportional = kp * error;
+  integral += ki * error;
+  derivative = kd * (error - last_error);
+
+  float pid = proportional + integral + derivative;
+  last_error = error;
+
+  doc["d2"] = (pid > 0) - (pid < 0); // get sign of pid
+  doc["s2"] = abs((int)pid);
+  serializeJson(doc, arduino_serial);
+  Serial.printf("PID: %d",pid);
+  delay(200);
+}
 
 void setup() {
+
+  pinMode(M1_C1_PIN, INPUT_PULLUP);
+  pinMode(M1_C2_PIN, INPUT_PULLUP);
+
   // Begin serial communication to pc
   Serial.begin(BAUDRATE_ESP32);
   // Begin serial communication to arduino
@@ -50,30 +96,44 @@ void setup() {
   #endif
 
   // attach interrupts for pin D5 D19
-  attachInterrupt(digitalPinToInterrupt(5), [] {Serial.println("D5 Interrupt rising");}, RISING);
-  // attachInterrupt(digitalPinToInterrupt(19), [] {Serial.println("D19 Interrupt");}, RISING);
-}
+  attachInterrupt(digitalPinToInterrupt(M1_C1_PIN), interrupt_m1_c1, RISING);
+  attachInterrupt(digitalPinToInterrupt(M1_C2_PIN), interrupt_m1_c2, RISING);
 
-int i=0;
+  
+  auto a = xTaskCreate(periodic_counter_print, "periodic_counter_print", 10000, NULL, 1, NULL);
+  if(a == pdPASS){
+    Serial.println("Periodic Print created successfully");
+  }else{
+    Serial.println("Periodic Print creation failed");
+  }
+
+  // auto b = xTaskCreate(pid_func, "pid_func", 10000, NULL, 1, NULL);
+  // if(b == pdPASS){
+  //   Serial.println("PID Task created successfully");
+  // }else{
+  //   Serial.println("PID Task creation failed");
+  // }
+
+  m1_count = 0;
+}
 
 void loop() {
 
-  // doc["m1"] = 1;
-  // doc["d1"] = 1;
-  // doc["s1"] = i;
+  if(arduino_serial.available()){
+    String data = arduino_serial.readString();
+    Serial.println(data);
+  }
 
-  // doc["m2"] = 1;
-  // doc["d2"] = 1;
-  // doc["s2"] = i;
+  doc["d1"] = 1;
+  doc["s1"] = 100;
+  serializeJson(doc, arduino_serial);
+  Serial.println("Sent data to arduino");
+  serializeJson(doc, Serial);
+  Serial.println();
 
-  // i = (i + 30) % 255;
-
-  // serializeJson(doc, arduino_serial);
-
-  // serializeJson(doc, Serial);
-  // Serial.println();
-
-  // doc.clear();
-
-  // delay(300);
+  delay(1000);
+  doc["d1"] = 0;
+  doc["s1"] = 0;
+  serializeJson(doc, arduino_serial);
+  delay(1000);
 }

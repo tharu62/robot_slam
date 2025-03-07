@@ -5,4 +5,5 @@ install/*
 log
 launch.bash
 setup.bash
+start.bash
 rviz/urdf.rviz

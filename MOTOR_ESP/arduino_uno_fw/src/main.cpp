@@ -32,8 +32,10 @@ void setup() {
 
   M1.setSpeed(255);
   M1.run(RELEASE);
-  M1.setSpeed(255);
-  M1.run(RELEASE);
+  M2.setSpeed(255);
+  M2.run(RELEASE);
+
+  Serial.println("Arduino is ready");
 }
 
 void loop() {
@@ -41,6 +43,8 @@ void loop() {
     
     size_t len = Serial.readBytesUntil('}', buffer, MAX_BUFFER_SIZE);
     buffer[len] = '}';
+
+    
 
     if(len >0){
     
@@ -68,7 +72,7 @@ void loop() {
             M1.run(BACKWARD);
           }
         }
-
+        
         if(doc.containsKey("d2") && doc.containsKey("s2") )
         {
           dir = doc["d2"];
