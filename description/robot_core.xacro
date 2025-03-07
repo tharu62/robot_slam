@@ -20,7 +20,7 @@
     <!-- BASE LINK -->
 
     <link name="base_link">
-
+    
     </link>
 
     <!-- CHASSIS LINK -->
@@ -43,7 +43,8 @@
 
     <!-- LEFT WHEEL LINK -->
 
-    <joint name="left_wheel_joint" type="continuous">
+    <!-- <joint name="left_wheel_joint" type="continuous"> -->
+    <joint name="left_wheel_joint" type="fixed">
         <parent link="base_link"/>
         <child link="left_wheel"/>
         <origin xyz="0 0.175 0" rpy="-${pi/2} 0 0"/>
@@ -61,7 +62,8 @@
 
     <!-- RIGHT WHEEL LINK -->
 
-    <joint name="right_wheel_joint" type="continuous">
+    <!-- <joint name="right_wheel_joint" type="continuous"> -->
+    <joint name="right_wheel_joint" type="fixed">
         <parent link="base_link"/>
         <child link="right_wheel"/>
         <origin xyz="0 -0.175 0" rpy="${pi/2} 0 0"/>
@@ -111,6 +113,7 @@
             <material name="orange"/>
         </visual>
     </link>
+
 
 
 </robot>

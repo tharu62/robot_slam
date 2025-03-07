@@ -34,7 +34,6 @@ int main(int argc, char * argv[])
   signal(SIGINT, sigint_handler);
   
   rclcpp::init(argc, argv);
-  // hardcode indirizzo esp32 come secondo parametro
   //tcp_init(client); 
   auto pub_node = std::make_shared<Odom_Publisher>();
   rclcpp::spin(pub_node);

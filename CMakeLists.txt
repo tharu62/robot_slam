@@ -12,6 +12,9 @@ find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 add_executable(talker src/pub.cpp)
 ament_target_dependencies(talker rclcpp std_msgs)
@@ -23,13 +26,17 @@ add_executable(talker_lidar src/pub_lidar.cpp src/tcp_connection.cpp src/udp_con
 ament_target_dependencies(talker_lidar rclcpp std_msgs sensor_msgs geometry_msgs)
 
 add_executable(talker_odom src/pub_odom.cpp src/tcp_connection.cpp)
-ament_target_dependencies(talker_odom rclcpp std_msgs nav_msgs geometry_msgs)
+ament_target_dependencies(talker_odom rclcpp std_msgs nav_msgs geometry_msgs tf2 tf2_ros tf2_geometry_msgs)
+
+add_executable(odom_tf2 src/odom_tf2_broadcaster.cpp)
+ament_target_dependencies(odom_tf2 rclcpp tf2 tf2_ros geometry_msgs)
 
 install(TARGETS
   talker
   listener
   talker_lidar
   talker_odom
+  odom_tf2
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
