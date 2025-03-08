@@ -13,7 +13,8 @@
 #include "nav_msgs/msg/odometry.hpp"
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/convert.h>
-#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+// #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp" // questo fixa l'errore di compilazione
 #include "tf2_ros/static_transform_broadcaster.h"
 #include <tf2_ros/transform_broadcaster.h>
 
