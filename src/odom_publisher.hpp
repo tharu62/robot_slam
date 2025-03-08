@@ -13,8 +13,7 @@
 #include "nav_msgs/msg/odometry.hpp"
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/convert.h>
-// #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
-#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp" // questo fixa l'errore di compilazione
+#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp" 
 #include "tf2_ros/static_transform_broadcaster.h"
 #include <tf2_ros/transform_broadcaster.h>
 
@@ -24,7 +23,7 @@
 //json libraries
 #include <nlohmann/json.hpp>
 
-#define BUFF_SIZE 2
+#define BUFF_SIZE 30
 #define RADIUS 0.03
 #define WHEELBASE 0.2
 
@@ -57,11 +56,9 @@ class Odom_Publisher : public rclcpp::Node
   public:
   nav_msgs::msg::Odometry odom_msg = nav_msgs::msg::Odometry();
   char buffer[BUFF_SIZE];
-
   char temp;
   std::string input_data;
   std::string str;
-  json output_data;
 
   Odom_Publisher()
     : Node("minimal_publisher")
@@ -70,7 +67,7 @@ class Odom_Publisher : public rclcpp::Node
       tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
       // tf_broadcaster_left_wheel = std::make_shared<tf2_ros::TransformBroadcaster>(this);
       // tf_broadcaster_right_wheel = std::make_shared<tf2_ros::TransformBroadcaster>(this);
-      timer_ = this->create_wall_timer( 500ms, [this]()->void{ this->call_back();});
+      timer_ = this->create_wall_timer( 100ms, [this]()->void{ this->call_back();});
     }
 
   void call_back(){
@@ -100,34 +97,27 @@ class Odom_Publisher : public rclcpp::Node
     odom_msg.header.frame_id = "odom";
     odom_msg.child_frame_id = "base_link";
 
-    // D_left = N_left*2*M_PI*RADIUS;
-    // D_right = N_right*2*M_PI*RADIUS;
-    // D_avg = (D_left + D_right)/2;
-    // delta_theta = (D_right - D_left)/WHEELBASE;
-    // odom_msg.pose.pose.orientation.w = theta + delta_theta;
-    // theta = odom_msg.pose.pose.orientation.w;
-    // delta_x = D_avg*cos(odom_msg.pose.pose.orientation.w);
-    // delta_y = D_avg*sin(odom_msg.pose.pose.orientation.w);
-    // odom_msg.pose.pose.position.x = x + delta_x;
-    // odom_msg.pose.pose.position.y = y + delta_y;
-    // x = odom_msg.pose.pose.position.x;
-    // y = odom_msg.pose.pose.position.y;
-    // odom_msg.twist.twist.linear.x = D_avg/delta_time;
-    // odom_msg.twist.twist.angular.z = delta_theta/delta_time;
+    // Input data
+    N_left += 0.001;
+    N_right += 0.002;
 
-    // Here you would fill the position and velocity of the robot, for now, we just use dummy data
-    odom_msg.pose.pose.position.x = 1.0;
-    odom_msg.pose.pose.position.y = 1.0;
+    // Oodometry calculation
+    D_left = N_left*2*M_PI*RADIUS;
+    D_right = N_right*2*M_PI*RADIUS;
+    D_avg = (D_left + D_right)/2;
+    delta_theta = (D_right - D_left)/WHEELBASE;
     tf2::Quaternion q;
-    q.setRPY(0,0,0.7);
-    //q.normalize();
+    q.setRPY(0,0,(theta + delta_theta));
+    theta += delta_theta;
     odom_msg.pose.pose.orientation = tf2::toMsg(q);
-    // odom_msg.pose.pose.orientation.x = 0;
-    // odom_msg.pose.pose.orientation.y = 0;
-    // odom_msg.pose.pose.orientation.z = 0.785398;
-    // odom_msg.pose.pose.orientation.w = 1;  
-    odom_msg.twist.twist.linear.x = 0.1;
-    odom_msg.twist.twist.angular.z = 0.05;
+    delta_x = D_avg*cos(theta);
+    delta_y = D_avg*sin(theta);
+    odom_msg.pose.pose.position.x = x + delta_x;
+    odom_msg.pose.pose.position.y = y + delta_y;
+    x = odom_msg.pose.pose.position.x;
+    y = odom_msg.pose.pose.position.y;
+    odom_msg.twist.twist.linear.x = D_avg/delta_time;
+    odom_msg.twist.twist.angular.z = delta_theta/delta_time;
 
     // Publish the odometry message
     this->publisher_->publish(odom_msg);
@@ -146,7 +136,14 @@ class Odom_Publisher : public rclcpp::Node
     
     // Broadcast the transform
     tf_broadcaster_->sendTransform(transform);
-    //new_x += 0.001;
+
+    if(N_left == 0.1){
+      N_left = 0;
+    }
+    if(N_right == 0.1){
+      N_right = 0;
+    }
+
   }
   
   private:
