@@ -1,0 +1,19 @@
+#!/bin/bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+MODEL_PATH=$SCRIPT_DIR/description/robot.urdf.xacro
+RVIZ_CONFIG_PATH=$SCRIPT_DIR/rviz/urdf.rviz
+
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo -e "${BLUE}Current File Directory${NC}:     : [$SCRIPT_DIR]"
+echo -e "${GREEN}Model Path${NC}: $MODEL_PATH"
+echo -e "${GREEN}RVIZ Config Path${NC}: $RVIZ_CONFIG_PATH"
+
+ros2 launch robot_slam talker.launch.py model:=$MODEL_PATH rvizconfig:=$RVIZ_CONFIG_PATH
