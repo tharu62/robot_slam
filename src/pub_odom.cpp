@@ -9,6 +9,7 @@
 #include "std_msgs/msg/string.hpp"
 
 #include "odom_publisher.hpp"
+#include "teleop_twist_sub.hpp"
 #include "tcp_connection.h"
 
 using namespace std::chrono_literals;
@@ -34,11 +35,16 @@ int main(int argc, char * argv[])
   signal(SIGINT, sigint_handler);
   
   rclcpp::init(argc, argv);
-  //tcp_init(client); 
+  tcp_init(client); 
   auto pub_node = std::make_shared<Odom_Publisher>();
-  rclcpp::spin(pub_node);
-  
-  //tcp_close(client);
+  auto sub_node = std::make_shared<Teleop_Subscriber>();
+
+  rclcpp::executors::MultiThreadedExecutor exec;
+  exec.add_node(pub_node);
+  exec.add_node(sub_node);
+  exec.spin();
+
+  tcp_close(client);
   rclcpp::shutdown();
   return 0;
 }

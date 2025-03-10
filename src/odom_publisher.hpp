@@ -10,6 +10,7 @@
 //librerie per ROS2
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
+#include "geometry_msgs/msg/twist.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/convert.h>
@@ -23,7 +24,7 @@
 //json libraries
 #include <nlohmann/json.hpp>
 
-#define BUFF_SIZE 30
+#define BUFF_SIZE_1 50
 #define RADIUS 0.03
 #define WHEELBASE 0.2
 
@@ -50,44 +51,54 @@ class Odom_Publisher : public rclcpp::Node
   float delta_theta = 0.0;
   float delta_time = 0.1;
 
+  float v_r;
+  float v_l;
+
   public:
   nav_msgs::msg::Odometry odom_msg = nav_msgs::msg::Odometry();
-  char buffer[BUFF_SIZE];
+  char buffer_in[BUFF_SIZE_1];
+  char buffer_out[BUFF_SIZE_1];
   char temp;
   std::string input_data;
   std::string str;
 
+
   Odom_Publisher()
-    : Node("minimal_publisher")
+    : Node("odom_publisher")
     {
-      publisher_ = this->create_publisher<nav_msgs::msg::Odometry>("odom", 20);
+
       tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
+      publisher_  = this->create_publisher<nav_msgs::msg::Odometry>("odom", 20);
+      timer_      = this->create_wall_timer( 100ms, std::bind(&Odom_Publisher::call_back, this));
+
+
+      // subscription_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, std::bind(&Odom_Publisher::twist_callback, this, std::placeholders::_1));
+      //timer_ = this->create_wall_timer( 100ms, [this]()->void{ this->call_back();});
       // tf_broadcaster_left_wheel = std::make_shared<tf2_ros::TransformBroadcaster>(this);
       // tf_broadcaster_right_wheel = std::make_shared<tf2_ros::TransformBroadcaster>(this);
-      timer_ = this->create_wall_timer( 100ms, [this]()->void{ this->call_back();});
     }
 
   void call_back(){
 
     input_data = "";
     for(int i=0; i < TCP_BUFFSIZE; i++){
-      buffer[i] = '\0';
+      buffer_in[i] = '\0';
     }
-    for(int i=0; i<BUFF_SIZE; i++){
+    for(int i=0; i<BUFF_SIZE_1; i++){
       for(int i = 0; temp != '\n'; i++){
         recv(client, &temp, 1, 0);
         if(temp == '\n'){
           break;
         }
-        buffer[i] = temp;
+        buffer_in[i] = temp;
       }
     }
     temp = '\0';
-    if(buffer[0] != '\0'){
-      input_data = buffer;
+    if(buffer_in[0] != '\0'){
+      input_data = buffer_in;
       j = json::parse(input_data);
-      N_left = j["d1"];
-      N_right = j["d2"];
+      N_left = j["d1"].get<int>()/10000.0;
+      N_right = j["d2"].get<int>()/10000.0;
     }
 
     // Create and populate the Odometry message
@@ -130,21 +141,14 @@ class Odom_Publisher : public rclcpp::Node
     // Broadcast the transform
     tf_broadcaster_->sendTransform(transform);
 
-    if(N_left == 0.1){
-      N_left = 0;
-    }
-    if(N_right == 0.1){
-      N_right = 0;
-    }
-
   }
   
   private:
   rclcpp::TimerBase::SharedPtr timer_;
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
+  rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr publisher_;
   // std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_left_wheel;
   // std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_roght_wheel;
-  rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr publisher_;
   
 };
 

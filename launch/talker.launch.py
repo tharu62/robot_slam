@@ -18,7 +18,7 @@ def generate_launch_description():
                 parameters=[{'use_sim_time': True}]
         )
 
-        talker_node_odom = Node(
+        talker_odom = Node(
                 package='robot_slam',
                 executable='talker_odom',
                 name='talker_odom',
@@ -68,9 +68,9 @@ def generate_launch_description():
         # ))
         
         # ld.add_action(talker_node)
-        #ld.add_action(odom_tf2)
-        #ld.add_action(talker_node_odom)
-        ld.add_action(listener_keys)
+        ld.add_action(odom_tf2)
+        ld.add_action(talker_odom)
+        #ld.add_action(listener_keys)
         
         # cmd per lanciare launch file con rviz:
         # ros2 launch robot_slam talker.launch.py model:=/home/utonto/ros2_ws/src/robot_slam/description/robot.urdf.xacro rvizconfig:=/mnt/c/Users/yehan/Documenti/robot_slam/rviz/urdf.rviz

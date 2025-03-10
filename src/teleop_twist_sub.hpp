@@ -18,7 +18,7 @@
 //json libraries
 #include <nlohmann/json.hpp>
 
-#define BUFF_SIZE 100
+#define BUFF_SIZE_2 100
 
 using namespace std::chrono_literals;
 using json = nlohmann::json;
@@ -26,19 +26,15 @@ using json = nlohmann::json;
 extern int client;
 extern struct sockaddr_in server_addr;
 
-struct Data
-{
-    float v_r;
-    float v_l;
-};
+float v_r;
+float v_l;
 
 class Teleop_Subscriber : public rclcpp::Node
 {
     private:
-    char buffer[BUFF_SIZE];
+    char buffer[BUFF_SIZE_2];
     json j;
     std::string str;
-    Data d;
     
     public:
 
@@ -51,10 +47,10 @@ class Teleop_Subscriber : public rclcpp::Node
     void twist_callback(geometry_msgs::msg::Twist::SharedPtr msg)
     {        
         
-        d.v_r = set_precision(msg->linear.x + msg->angular.z);
-        d.v_l = set_precision(msg->linear.x - msg->angular.z);
-        int temp1 = d.v_r * 1000;
-        int temp2 = d.v_l * 1000;
+        v_r = set_precision(msg->linear.x + msg->angular.z);
+        v_l = set_precision(msg->linear.x - msg->angular.z);
+        int temp1 = v_r * 1000;
+        int temp2 = v_l * 1000;
         j = json{{"v_r", temp1}, {"v_l", temp2}};
         str = j.dump();
         for(int i = 0; i <(int) str.length(); i++)

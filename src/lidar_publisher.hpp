@@ -40,7 +40,7 @@ class Lidar_Publisher : public rclcpp::Node
     : Node("minimal_publisher")
     {
       publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 20);
-      timer_ = this->create_wall_timer( 0ms, [this]()->void{ this->call_back_2(); });
+      timer_ = this->create_wall_timer( 0ms, [this]()->void{ this->call_back(); });
     }
 
   // void call_back(){
@@ -88,7 +88,7 @@ class Lidar_Publisher : public rclcpp::Node
   //   this->publisher_->publish(msg_scan);
   // }
 
-  void call_back_2(){
+  void call_back(){
     
     unsigned int len;
     std::vector<float> vec;
