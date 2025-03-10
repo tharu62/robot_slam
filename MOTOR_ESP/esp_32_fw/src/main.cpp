@@ -33,40 +33,41 @@ WiFiClient client;
 extern const char* ssid;
 extern const char* password;
 
-long int expected = 7000;
+volatile long int expected = 7000;
 
-float kp=0.1;
-float ki=0.01;
-float kd=0.01;
+double kp=0.8;
+double ki=0.081;
+double kd=0.7;
 
-float proportional=0.0;
-float integral=0.0;
-int derivative=0.0;
-float error=0.0;
-float last_error=0.0;
+PIDController pid;
+
 
 void pid_func(void *pvParameters) {
   while(1){
-    error = (float)(expected - m1_count);
-    
-    proportional = kp * error;
-    // integral += ki * error;
-    derivative = kd * (error - last_error);
-    
-    float pid = proportional + integral + derivative;
-    last_error = error;
-    
-    doc["d1"] = (pid > 0) - (pid < 0); // get sign of pid
-    doc["s1"] = abs((int)pid);
+
+    double val = -pid.compute((double)m1_count);
+
+    if(val > 0){
+      doc["d1"] = 1;
+    }else{
+      doc["d1"] = -1;
+    }
+
+    doc["s1"] = abs(val);
     serializeJson(doc, arduino_serial);
+
+    Serial.printf("Count: %d, pid:%lf\n", m1_count, val);
+    delay(100);
     
-    Serial.println("Counter: " + String(m1_count));
-    Serial.printf("Error: %f, p:%f, i:%f, d:%f",error, proportional, integral, derivative);
-    Serial.printf("PID: %f\n",doc["s1"].as<float>());
-    
-    delay(200);
   }
 }
+
+// void print_counters(void *pvParameters) {
+//   while(1){
+//     Serial.println("Counters: " + String(m1_count)+ " " + String(m2_count));
+//     delay(200);
+//   }
+// }
 
 void setup() {
 
@@ -98,6 +99,20 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(M1_C1_PIN), interrupt_m1_c1, RISING);
   attachInterrupt(digitalPinToInterrupt(M1_C2_PIN), interrupt_m1_c2, RISING);
 
+  attachInterrupt(digitalPinToInterrupt(M2_C1_PIN), interrupt_m2_c1, RISING);
+  attachInterrupt(digitalPinToInterrupt(M2_C2_PIN), interrupt_m2_c2, RISING);
+
+  doc["d1"] = 0;
+  doc["s1"] = 0;
+  doc["d2"] = 0;
+  doc["s2"] = 0;
+  serializeJson(doc, arduino_serial);
+
+  pid.begin();
+  pid.setpoint(7000);
+  pid.tune(kp, ki, kd);
+  pid.limit(-255, 255);
+
   // pid task
   auto b = xTaskCreate(pid_func, "pid_func", 10000, NULL, 1, NULL);
   if(b == pdPASS){
@@ -105,6 +120,13 @@ void setup() {
   }else{
     Serial.println("PID Task creation failed");
   }
+
+  // auto a = xTaskCreate(print_counters, "print_counters", 10000, NULL, 1, NULL);
+  // if(a == pdPASS){
+  //   Serial.println("Print Counters Task created successfully");
+  // }else{
+  //   Serial.println("Print Counters Task creation failed");
+  // }
 
   m1_count = 0;
 }
