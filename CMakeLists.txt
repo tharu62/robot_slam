@@ -30,6 +30,13 @@ ament_target_dependencies(odom_tf2 rclcpp tf2 tf2_ros geometry_msgs)
 add_executable(listener_keys src/velocity_input_sub.cpp src/tcp_connection.cpp)
 ament_target_dependencies(listener_keys rclcpp geometry_msgs)
 
+# add include directory
+INCLUDE_DIRECTORIES(
+  include
+  ${catkin_INCLUDE_DIRS}
+)
+
+# adding nodes installation
 install(TARGETS
   talker_lidar
   talker_odom
@@ -49,6 +56,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+# adding launch file installation
 install (DIRECTORY
   launch
   DESTINATION share/${PROJECT_NAME}
