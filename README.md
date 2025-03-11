@@ -1,6 +1,13 @@
 # HOW TO MAKE A ROBOT FOR SLAM
 
 ## TABLE OF CONTENTS
+* Project description
+* * Brief
+  * Software
+  * Hardware
+* Conclusions
+* Errors
+* WSL Options
 
 ## PROJECT DESCRIPTION
 ### BRIEF
