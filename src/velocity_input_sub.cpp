@@ -18,12 +18,10 @@ void sigint_handler(int sig)
 
 int main(int argc, char * argv[])
 {
-  //signal handler
   signal(SIGINT, sigint_handler);
 
   rclcpp::init(argc, argv);
   tcp_init(client);
-
   rclcpp::spin(std::make_shared<Teleop_Subscriber>());
 
   tcp_close(client);

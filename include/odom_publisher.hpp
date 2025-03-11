@@ -12,7 +12,6 @@
 #include "std_msgs/msg/string.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "nav_msgs/msg/odometry.hpp"
-#include <tf2/LinearMath/Quaternion.h>
 #include <tf2/convert.h>
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp" 
 #include "tf2_ros/static_transform_broadcaster.h"
@@ -27,12 +26,20 @@
 #define BUFF_SIZE_1 50
 #define RADIUS 0.03
 #define WHEELBASE 0.2
+#define REDUCTION_RATIO 6000.0
 
 using namespace std::chrono_literals;
 using json = nlohmann::json;
 
 extern int client;
 
+/**
+ * @brief This is a class that takes as input the values of revolution [N_left] [N_right] of the encoder 
+ * on some wheels, the delta time [delta_time] necessary to make the revolution and produces as output 
+ * the odometry message of a differential drive robot with the specified parameters defined above.
+ * @note [Input] is receved by tcp connection by a json. 
+ * @note [Output] is published on the /odom topic.
+ */
 class Odom_Publisher : public rclcpp::Node
 {
   private:
@@ -91,17 +98,14 @@ class Odom_Publisher : public rclcpp::Node
     if(buffer_in[0] != '\0'){
       input_data = buffer_in;
       j = json::parse(input_data);
-      N_left = j["d1"].get<int>()/10000.0;
-      N_right = j["d2"].get<int>()/10000.0;
+      N_left = j["d1"].get<int>()/REDUCTION_RATIO;
+      N_right = j["d2"].get<int>()/REDUCTION_RATIO;
     }
 
     // Create and populate the Odometry message
     odom_msg.header.stamp = this->get_clock()->now();
     odom_msg.header.frame_id = "odom";
     odom_msg.child_frame_id = "base_link";
-    // Input data
-    N_left += 0.001;
-    N_right += 0.001;
     // Oodometry calculation
     D_left = N_left*2*M_PI*RADIUS;
     D_right = N_right*2*M_PI*RADIUS;

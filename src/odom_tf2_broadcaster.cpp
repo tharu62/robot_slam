@@ -5,6 +5,9 @@
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2_ros/static_transform_broadcaster.h"
 
+/**
+ * @brief This is a class that takes no input and produces as output the static tf <map->odom>  
+ */
 class StaticFramePublisher : public rclcpp::Node
 {
 public:
@@ -12,14 +15,11 @@ public:
   : Node("static_odom_tf2_broadcaster")
   {
     tf_static_broadcaster_ = std::make_shared<tf2_ros::StaticTransformBroadcaster>(this);
-
-    // Publish static transforms once at startup
     this->make_transforms();
   }
 
 private:
-  void make_transforms()
-  {
+  void make_transforms(){
     geometry_msgs::msg::TransformStamped t;
 
     t.header.stamp = this->get_clock()->now();
@@ -38,13 +38,11 @@ private:
 
     tf_static_broadcaster_->sendTransform(t);
   }
-
   std::shared_ptr<tf2_ros::StaticTransformBroadcaster> tf_static_broadcaster_;
 };
 
 int main(int argc, char * argv[])
 {
-  // Pass parameters and initialize node
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<StaticFramePublisher>());
   rclcpp::shutdown();

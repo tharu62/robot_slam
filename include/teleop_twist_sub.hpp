@@ -27,6 +27,13 @@ extern int client;
 extern struct sockaddr_in server_addr;
 
 
+/**
+ * @brief This is a class that takes as input some velocity commands and produces as output a coherent 
+ * velocity input for a differential drive robot. 
+ * @note [Input] is read by subscribing to the /cmd_vel topic. 
+ * @note [Output] is sent by TCP connection by json string (the number of digits for velocity of each wheel is 
+ * capped at 3 for performance issue with the json and better error approximation). 
+ */
 class Teleop_Subscriber : public rclcpp::Node
 {
     private:
