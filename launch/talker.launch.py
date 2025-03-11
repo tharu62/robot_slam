@@ -10,7 +10,7 @@ def generate_launch_description():
         
         ld = LaunchDescription()
 
-        talker_node = Node(
+        talker_lidar = Node(
                 package='robot_slam',
                 executable='talker_lidar',
                 name='talker_lidar',
@@ -21,7 +21,7 @@ def generate_launch_description():
         talker_odom = Node(
                 package='robot_slam',
                 executable='talker_odom',
-                name='talker_odom',
+                # name='talker_odom',
                 output='screen',
                 parameters=[{'use_sim_time': True}]   
         )
@@ -41,7 +41,6 @@ def generate_launch_description():
                 output='screen',
                 parameters=[{'use_sim_time': True}]  
         )
-
 
                 
         # # These parameters are maintained for backwards compatibility
@@ -67,7 +66,7 @@ def generate_launch_description():
         #         'jsp_gui': LaunchConfiguration('gui')}.items()
         # ))
         
-        # ld.add_action(talker_node)
+        # ld.add_action(talker_lidar)
         ld.add_action(odom_tf2)
         ld.add_action(talker_odom)
         #ld.add_action(listener_keys)

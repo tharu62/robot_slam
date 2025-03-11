@@ -26,15 +26,15 @@ using json = nlohmann::json;
 extern int client;
 extern struct sockaddr_in server_addr;
 
-float v_r;
-float v_l;
 
 class Teleop_Subscriber : public rclcpp::Node
 {
     private:
     char buffer[BUFF_SIZE_2];
-    json j;
     std::string str;
+    float v_r;
+    float v_l;
+    json j;
     
     public:
 

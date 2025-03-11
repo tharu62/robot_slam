@@ -36,10 +36,8 @@ extern int client;
 class Odom_Publisher : public rclcpp::Node
 {
   private:
-  json j;
   double new_x = 0.0;
   float angle = 0.0;
-
   float N_left = 0.0;
   float N_right = 0.0;
   float D_left = 0.0;
@@ -50,18 +48,17 @@ class Odom_Publisher : public rclcpp::Node
   float delta_y = 0.0;
   float delta_theta = 0.0;
   float delta_time = 0.1;
-
   float v_r;
   float v_l;
 
-  public:
-  nav_msgs::msg::Odometry odom_msg = nav_msgs::msg::Odometry();
   char buffer_in[BUFF_SIZE_1];
   char buffer_out[BUFF_SIZE_1];
-  char temp;
   std::string input_data;
-  std::string str;
-
+  char temp;
+  json j;
+  
+  public:
+  nav_msgs::msg::Odometry odom_msg = nav_msgs::msg::Odometry();
 
   Odom_Publisher()
     : Node("odom_publisher")
@@ -71,9 +68,6 @@ class Odom_Publisher : public rclcpp::Node
       publisher_  = this->create_publisher<nav_msgs::msg::Odometry>("odom", 20);
       timer_      = this->create_wall_timer( 100ms, std::bind(&Odom_Publisher::call_back, this));
 
-
-      // subscription_ = this->create_subscription<geometry_msgs::msg::Twist>("cmd_vel", 10, std::bind(&Odom_Publisher::twist_callback, this, std::placeholders::_1));
-      //timer_ = this->create_wall_timer( 100ms, [this]()->void{ this->call_back();});
       // tf_broadcaster_left_wheel = std::make_shared<tf2_ros::TransformBroadcaster>(this);
       // tf_broadcaster_right_wheel = std::make_shared<tf2_ros::TransformBroadcaster>(this);
     }
@@ -100,6 +94,8 @@ class Odom_Publisher : public rclcpp::Node
       N_left = j["d1"].get<int>()/10000.0;
       N_right = j["d2"].get<int>()/10000.0;
     }
+
+    LOG_DEBUG_C(input_data);
 
     // Create and populate the Odometry message
     odom_msg.header.stamp = this->get_clock()->now();

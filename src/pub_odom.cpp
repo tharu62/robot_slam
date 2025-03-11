@@ -31,17 +31,17 @@ int client;
 
 int main(int argc, char * argv[])
 { 
-  //signal handler
   signal(SIGINT, sigint_handler);
   
   rclcpp::init(argc, argv);
   tcp_init(client); 
+
   auto pub_node = std::make_shared<Odom_Publisher>();
   auto sub_node = std::make_shared<Teleop_Subscriber>();
 
   rclcpp::executors::MultiThreadedExecutor exec;
-  exec.add_node(pub_node);
   exec.add_node(sub_node);
+  exec.add_node(pub_node);
   exec.spin();
 
   tcp_close(client);
