@@ -1,6 +1,14 @@
-# robot_slam
+# HOW TO MAKE A ROBOT FOR SLAM
 
+## TABLE OF CONTENTS
 
+## PROJECT DESCRIPTION
+### BRIEF
+### SOFTWARE 
+### HARDWARE
+
+## CONCLUSIONS
+## ERRORS
 ### WSL options
 if rviz2 presents a graphic glitch in wsl2 it is probably due to grafix probelms: add to ~/.bashrc
 
