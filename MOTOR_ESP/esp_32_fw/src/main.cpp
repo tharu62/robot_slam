@@ -8,15 +8,20 @@
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/timers.h"
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <HardwareSerial.h>
-#include <PIDController.h>
 #include <WiFi.h>
 #include <vector>
 #include <string>
 
+#include "customPID.h"
 #include "encoders.h"
+
+#define COUNT_PER_BIG_ROTATION 5940
+#define COUNT_PER_SMALL_ROTATION 22
+
 
 #define TX_PIN 17
 #define RX_PIN 16
@@ -30,6 +35,7 @@ HardwareSerial arduino_serial(2);
 
 JsonDocument doc;
 WiFiClient client;
+
 extern const char* ssid;
 extern const char* password;
 
@@ -39,35 +45,25 @@ double kp=0.8;
 double ki=0.081;
 double kd=0.7;
 
-PIDController pid;
+PID<double, double> pid(kp, ki, kd, 5940);
 
+void pid_timer_callback(TimerHandle_t xTimer){
 
-void pid_func(void *pvParameters) {
-  while(1){
+  double speed = pid.compute(m1_count, 0.1);
+  Serial.printf("speed: %lf, count: %lf, error: %lf\n", speed, m1_count, pid.getError());
 
-    double val = -pid.compute((double)m1_count);
+  doc["d1"] = -sign(speed);
+  doc["s1"] = (int)abs(speed);
+  doc["d2"] = 0;
+  doc["s2"] = 0;
+  serializeJson(doc, arduino_serial);
 
-    if(val > 0){
-      doc["d1"] = 1;
-    }else{
-      doc["d1"] = -1;
-    }
-
-    doc["s1"] = abs(val);
-    serializeJson(doc, arduino_serial);
-
-    Serial.printf("Count: %d, pid:%lf\n", m1_count, val);
-    delay(100);
-    
-  }
 }
 
-// void print_counters(void *pvParameters) {
-//   while(1){
-//     Serial.println("Counters: " + String(m1_count)+ " " + String(m2_count));
-//     delay(200);
-//   }
-// }
+TimerHandle_t velocity_timer = xTimerCreate("velocity_timer", pdMS_TO_TICKS(1000), pdTRUE, (void *)0, interrupt_v1);
+TimerHandle_t velocity_timer2 = xTimerCreate("velocity_timer2", pdMS_TO_TICKS(1000), pdTRUE, (void *)0, interrupt_v2);
+
+TimerHandle_t pid_timer = xTimerCreate("pid_timer", pdMS_TO_TICKS(100), pdTRUE, (void *)0, pid_timer_callback);
 
 void setup() {
 
@@ -79,61 +75,61 @@ void setup() {
   // Begin serial communication to arduino
   arduino_serial.begin(BAUDRATE_ARDUINO, SERIAL_8N1, RX_PIN, TX_PIN);
 
-  #if USE_WIFI == 1
-  // Connect to WiFi
-  WiFi.begin(ssid, password);
-  Serial.println("Connecting to WiFi..");
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
-    delay(1000);
-  }
-  Serial.println();
-  Serial.println("Connected to the WiFi network");
-  Serial.print("IP Address: ");
-  Serial.println(WiFi.localIP());
-
-  // client connection
-  #endif
-
+  pid.setLimit(255);
   // attach interrupts for pin D5 D19
   attachInterrupt(digitalPinToInterrupt(M1_C1_PIN), interrupt_m1_c1, RISING);
   attachInterrupt(digitalPinToInterrupt(M1_C2_PIN), interrupt_m1_c2, RISING);
-
+  
   attachInterrupt(digitalPinToInterrupt(M2_C1_PIN), interrupt_m2_c1, RISING);
   attachInterrupt(digitalPinToInterrupt(M2_C2_PIN), interrupt_m2_c2, RISING);
-
+  
   doc["d1"] = 0;
   doc["s1"] = 0;
   doc["d2"] = 0;
   doc["s2"] = 0;
   serializeJson(doc, arduino_serial);
-
-  pid.begin();
-  pid.setpoint(7000);
-  pid.tune(kp, ki, kd);
-  pid.limit(-255, 255);
-
-  // pid task
-  auto b = xTaskCreate(pid_func, "pid_func", 10000, NULL, 1, NULL);
-  if(b == pdPASS){
-    Serial.println("PID Task created successfully");
-  }else{
-    Serial.println("PID Task creation failed");
-  }
-
-  // auto a = xTaskCreate(print_counters, "print_counters", 10000, NULL, 1, NULL);
-  // if(a == pdPASS){
-  //   Serial.println("Print Counters Task created successfully");
-  // }else{
-  //   Serial.println("Print Counters Task creation failed");
-  // }
-
+  
   m1_count = 0;
+  m2_count = 0;
+  m1_count_old = 0;
+  m2_count_old = 0;
+  v1_count = 0;
+  v2_count = 0;
+  
+  // xTimerStart(velocity_timer, 0);
+  // xTimerStart(velocity_timer2, 0);
+  xTimerStart(pid_timer, 2);
 }
 
 void loop() {
+
+  if(m1_count >= (10*COUNT_PER_BIG_ROTATION) - 340){
+    doc["d1"] = 0;
+    doc["s1"] = 0;
+    doc["d2"] = 0;
+    doc["s2"] = 0;
+    serializeJson(doc, arduino_serial);
+  }
+
   if(arduino_serial.available()){
     String data = arduino_serial.readString();
     Serial.println(data);
+  }
+
+  if(Serial.available()){
+
+    String data = Serial.readString();
+
+    if(data == "1"){
+
+      xTimerStop(pid_timer, 0);
+
+      doc["d1"] = 0;
+      doc["s1"] = 0;
+      doc["d2"] = 0;
+      doc["s2"] = 0;
+
+      serializeJson(doc, arduino_serial);
+    }
   }
 }
