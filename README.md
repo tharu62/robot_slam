@@ -2,7 +2,7 @@
 
 ## TABLE OF CONTENTS
 * Project description
-* * Brief
+  * Brief
   * Software
   * Hardware
 * Conclusions
