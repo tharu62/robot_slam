@@ -66,7 +66,7 @@ class Odom_Publisher : public rclcpp::Node
 
       tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
       publisher_  = this->create_publisher<nav_msgs::msg::Odometry>("odom", 20);
-      timer_      = this->create_wall_timer( 100ms, std::bind(&Odom_Publisher::call_back, this));
+      timer_      = this->create_wall_timer( 0ms, std::bind(&Odom_Publisher::call_back, this));
 
       // tf_broadcaster_left_wheel = std::make_shared<tf2_ros::TransformBroadcaster>(this);
       // tf_broadcaster_right_wheel = std::make_shared<tf2_ros::TransformBroadcaster>(this);
@@ -94,8 +94,6 @@ class Odom_Publisher : public rclcpp::Node
       N_left = j["d1"].get<int>()/10000.0;
       N_right = j["d2"].get<int>()/10000.0;
     }
-
-    LOG_DEBUG_C(input_data);
 
     // Create and populate the Odometry message
     odom_msg.header.stamp = this->get_clock()->now();
