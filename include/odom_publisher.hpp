@@ -26,7 +26,7 @@
 #define BUFF_SIZE_1 50
 #define RADIUS 0.03
 #define WHEELBASE 0.2
-#define REDUCTION_RATIO 6000.0
+#define REDUCTION_RATIO 5940.0
 
 using namespace std::chrono_literals;
 using json = nlohmann::json;

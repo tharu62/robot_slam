@@ -1,22 +1,48 @@
 # HOW TO MAKE A ROBOT FOR SLAM
 
-## TABLE OF CONTENTS
-* Project description
-  * Brief
-  * Software
-  * Hardware
-* Conclusions
-* Errors
-* WSL Options
+## Table OF Contents
+```bash
+- Project Description......................................................................................... .
+  - Brief .......................................................................................... .
+  - Software ....................................................................................... .
+    - OS ........................................................................................... .
+    - ROS .......................................................................................... .
+    - Code and Architecture ........................................................................ .
+  - Hardware ....................................................................................... .
+    - Linux Machine ................................................................................ .
+    - Microcontrollers ............................................................................. .
+    - Sensors ...................................................................................... .
+        - Lidar .................................................................................... .
+        - Encoders ................................................................................. .
+    - Actuators .................................................................................... .
+        - DC Motors ................................................................................ .
+- Conclusions ...................................................................................... .
+- Errors ........................................................................................... .
+- WSL Options ...................................................................................... .
+```
 
-## PROJECT DESCRIPTION
+## Project Description
+
 ### BRIEF
-### SOFTWARE 
-### HARDWARE
+This repository contains a detail description of how to build and set up a differential drive robot that can perform SLAM (Simultaneous Localization and Mapping). The 
 
-## CONCLUSIONS
-## ERRORS
-### WSL options
+### SOFTWARE
+### OS 
+### ROS 
+### Code and Architecture 
+
+### HARDWARE 
+### Linux Machine 
+### Microcontrollers 
+### Sensors 
+### Lidar
+### Encoders
+### Actuators 
+### DC Motors
+
+## Conclusion
+## Errors
+## WSL options
 if rviz2 presents a graphic glitch in wsl2 it is probably due to grafix probelms: add to ~/.bashrc
 
 ```bash
