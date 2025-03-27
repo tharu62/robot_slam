@@ -30,7 +30,7 @@ class PID{
 
 public:
 
-    PID(T kp, T ki, T kd, U target): kp_(kp), ki_(ki), kd_(kd), limit_min(0), limit_max(0),
+    PID(T kp, T ki, T kd, U target): kp_(kp), ki_(ki), kd_(kd), limit_min(0), limit_max(0), devider_(1),
         proportional_(0), integral_(0), derivative_(0), target_(target), error_(target), error_old(0), pid_(0)
     {
         LOG("PID Controller Initialized");
@@ -42,12 +42,18 @@ public:
         target_ = target;
     }
 
-    void setLimit(T limit)
+    void setDevider(T devider)
     {
-        limit_max = limit;
+        devider_ = devider;
+    }
+
+    void setLimit(T limit_min_, T limit_max_)
+    {
+        limit_min = limit_min_;
+        limit_max = limit_max_;
     }
     
-    T compute(U input, T time_interval=0.1)
+    T compute(U input, T time_interval)
     {
 
         error_ = (T)(target_ - input);
@@ -60,7 +66,7 @@ public:
 
         error_old = error_;
         
-        pid_ = (proportional_ + integral_ + derivative_ );
+        pid_ = (proportional_ + integral_ + derivative_ ) / devider_;
 
         if(pid_ > limit_max){
             pid_ = limit_max;
@@ -98,6 +104,8 @@ private:
     // PID value limit
     T limit_max;
     T limit_min;
+
+    T devider_;
     
     // Target value to reach
     U target_;
