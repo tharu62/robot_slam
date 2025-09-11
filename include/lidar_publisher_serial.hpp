@@ -23,6 +23,7 @@
 //json libraries
 #include <nlohmann/json.hpp>
 
+//librerie aggiuntive
 #include "custom_defines.h"
 
 #define RANGES_BUFF_SIZE 90
@@ -31,6 +32,9 @@ using namespace std::chrono_literals;
 
 extern int client;
 
+/**
+ * 
+ */
 class Lidar_Publisher : public rclcpp::Node
 {
   private:

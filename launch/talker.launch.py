@@ -73,5 +73,8 @@ def generate_launch_description():
         # cmd per lanciare launch file con rviz manualmente:
         # ros2 launch robot_slam talker.launch.py model:=/home/utonto/ros2_ws/src/robot_slam/description/robot.urdf.xacro rvizconfig:=/mnt/c/Users/yehan/Documenti/robot_slam/rviz/urdf.rviz
         # ros2 run joint_state_publisher_gui joint_state_publisher_gui
+
+        # cmd per lanciare launch file con rviz manualmente (nuovo):
+        # ros2 launch robot_slam talker.launch.py model:=/home/deshan/Ros/src/robot_slam/description/robot.urdf.xacro rvizconfig:=/home/deshan/Ros/src/robot_slam/rviz/urdf.rviz
         
         return ld
