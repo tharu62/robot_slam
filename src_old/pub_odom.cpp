@@ -7,11 +7,14 @@
 //librerie per ROS2
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
-#include "custom_defines.h"
 
 #include "odom_publisher.hpp"
+#include "teleop_twist_sub.hpp"
+#include "tcp_connection.h"
 
 using namespace std::chrono_literals;
+using json = nlohmann::json;
+
 /**
  * @brief Signal handler for SIGINT
  * @details This function is called when the program receives a SIGINT signal (CONTROL-C)
@@ -19,6 +22,7 @@ using namespace std::chrono_literals;
 void sigint_handler(int sig)
 {
   LOG_ERROR_C("Caught signal " << sig);
+  tcp_close(client);
   rclcpp::shutdown();
   exit(0);
 }
@@ -28,11 +32,19 @@ int client;
 int main(int argc, char * argv[])
 { 
   signal(SIGINT, sigint_handler);
+  
   rclcpp::init(argc, argv);
+  tcp_init(client); 
 
   auto pub_node = std::make_shared<Odom_Publisher>();
-  rclcpp::spin(pub_node);
+  auto sub_node = std::make_shared<Teleop_Subscriber>();
 
+  rclcpp::executors::MultiThreadedExecutor exec;
+  exec.add_node(sub_node);
+  exec.add_node(pub_node);
+  exec.spin();
+
+  tcp_close(client);
   rclcpp::shutdown();
   return 0;
 }

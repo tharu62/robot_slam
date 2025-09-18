@@ -17,20 +17,27 @@
 #include "tf2_ros/static_transform_broadcaster.h"
 #include <tf2_ros/transform_broadcaster.h>
 
+// librerie per comunicazione wireless
+#include "tcp_connection.h"
+
+//json libraries
+#include <nlohmann/json.hpp>
+
 #define BUFF_SIZE_1 50
 #define RADIUS 0.03
 #define WHEELBASE 0.2
 #define REDUCTION_RATIO 5940.0
 
 using namespace std::chrono_literals;
+using json = nlohmann::json;
 
 extern int client;
 
 /**
  * @brief This is a class that takes as input the values of revolution [N_left] [N_right] of the encoder 
- * on the wheels, the delta time [delta_time] necessary to make the revolution and produces as output 
+ * on some wheels, the delta time [delta_time] necessary to make the revolution and produces as output 
  * the odometry message of a differential drive robot with the specified parameters defined above.
- * @note [Input] is receved by ros2 topic <wheel_steps>. 
+ * @note [Input] is receved by tcp connection by a json. 
  * @note [Output] is published on the /odom topic.
  */
 class Odom_Publisher : public rclcpp::Node
@@ -50,6 +57,12 @@ class Odom_Publisher : public rclcpp::Node
   float delta_time = 0.1;
   float v_r;
   float v_l;
+
+  char buffer_in[BUFF_SIZE_1];
+  char buffer_out[BUFF_SIZE_1];
+  std::string input_data;
+  char temp;
+  json j;
   
   public:
   nav_msgs::msg::Odometry odom_msg = nav_msgs::msg::Odometry();
@@ -62,9 +75,32 @@ class Odom_Publisher : public rclcpp::Node
       publisher_  = this->create_publisher<nav_msgs::msg::Odometry>("odom", 20);
       timer_      = this->create_wall_timer( 0ms, std::bind(&Odom_Publisher::call_back, this));
 
+      // tf_broadcaster_left_wheel = std::make_shared<tf2_ros::TransformBroadcaster>(this);
+      // tf_broadcaster_right_wheel = std::make_shared<tf2_ros::TransformBroadcaster>(this);
     }
 
   void call_back(){
+
+    input_data = "";
+    for(int i=0; i < TCP_BUFFSIZE; i++){
+      buffer_in[i] = '\0';
+    }
+    for(int i=0; i<BUFF_SIZE_1; i++){
+      for(int i = 0; temp != '\n'; i++){
+        recv(client, &temp, 1, 0);
+        if(temp == '\n'){
+          break;
+        }
+        buffer_in[i] = temp;
+      }
+    }
+    temp = '\0';
+    if(buffer_in[0] != '\0'){
+      input_data = buffer_in;
+      j = json::parse(input_data);
+      N_left = j["d1"].get<int>()/REDUCTION_RATIO;
+      N_right = j["d2"].get<int>()/REDUCTION_RATIO;
+    }
 
     // Create and populate the Odometry message
     odom_msg.header.stamp = this->get_clock()->now();
@@ -109,6 +145,8 @@ class Odom_Publisher : public rclcpp::Node
   rclcpp::TimerBase::SharedPtr timer_;
   std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr publisher_;
+  // std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_left_wheel;
+  // std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_roght_wheel;
   
 };
 
