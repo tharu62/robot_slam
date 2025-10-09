@@ -28,6 +28,9 @@ ament_target_dependencies(talker_odom rclcpp std_msgs nav_msgs geometry_msgs tf2
 add_executable(odom_tf2 src/odom_tf2_broadcaster.cpp)
 ament_target_dependencies(odom_tf2 rclcpp tf2 tf2_ros geometry_msgs)
 
+# add_executable(lidar_tf2 src/lidar_tf2_broadcaster.cpp)
+# ament_target_dependencies(lidar_tf2 rclcpp tf2 tf2_ros geometry_msgs)
+
 # unused node listener_keys
 # add_executable(listener_keys src/sub_velocity_input.cpp src/tcp_connection.cpp)
 # ament_target_dependencies(listener_keys rclcpp geometry_msgs)
@@ -43,6 +46,7 @@ install(TARGETS
   # talker_lidar
   talker_odom
   odom_tf2
+  # lidar_tf2
   # listener_keys
   DESTINATION lib/${PROJECT_NAME})
 

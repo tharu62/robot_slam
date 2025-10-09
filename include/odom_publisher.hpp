@@ -19,10 +19,11 @@
 #include "my_robot_interfaces/msg/dif_drive.hpp"
 
 #define BUFF_SIZE_1 50
-#define RADIUS 0.03
-#define WHEELBASE 0.2
+#define RADIUS 0.04
+#define WHEELBASE 0.3
 #define REDUCTION_RATIO 5940.0
-#define MAX_STEPS 11
+#define MAX_STEPS_RIGHT 1365
+#define MAX_STEPS_LEFT 1365
 
 using namespace std::chrono_literals;
 
@@ -75,8 +76,8 @@ class Odom_Publisher : public rclcpp::Node
     odom_msg.child_frame_id = "base_link";
 
     // Oodometry calculation
-    D_left = msg->left_wheel_steps*2*M_PI*RADIUS/MAX_STEPS;
-    D_right = msg->right_wheel_steps*2*M_PI*RADIUS/MAX_STEPS;
+    D_left = msg->left_wheel_steps*2*M_PI*RADIUS/MAX_STEPS_LEFT;
+    D_right = msg->right_wheel_steps*2*M_PI*RADIUS/MAX_STEPS_RIGHT;
     D_avg = (D_left + D_right)/2;
     delta_theta = (D_right - D_left)/WHEELBASE;
     tf2::Quaternion q;
@@ -95,21 +96,20 @@ class Odom_Publisher : public rclcpp::Node
     // Publish the odometry message
     this->publisher_->publish(odom_msg);
 
-    // Create and populate the TransformStamped message
+    // Create and populate the TransformStamped message for base_link
     geometry_msgs::msg::TransformStamped transform;
     transform.header.stamp = this->get_clock()->now();
     transform.header.frame_id = "odom";
     transform.child_frame_id = "base_link";
 
-    // Here we use the same dummy data as the odometry message
+    // odometry message
     transform.transform.translation.x = odom_msg.pose.pose.position.x;
     transform.transform.translation.y = odom_msg.pose.pose.position.y;
     transform.transform.translation.z = 0.0;
     transform.transform.rotation = odom_msg.pose.pose.orientation;    
 
-    // Broadcast the transform
+    // Broadcast the transform for base_link
     tf_broadcaster_->sendTransform(transform);
-
   }
   
   private:

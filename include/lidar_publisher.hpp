@@ -47,14 +47,14 @@ class Lidar_Publisher : public rclcpp::Node
   std::string test;
 
   public:
-  sensor_msgs::msg::LaserScan msg_scan = sensor_msgs::msg::LaserScan();
-  char buffer[BUFF_SIZE];
+    sensor_msgs::msg::LaserScan msg_scan = sensor_msgs::msg::LaserScan();
+    char buffer[BUFF_SIZE];
 
   Lidar_Publisher()
     : Node("minimal_publisher")
     {
       publisher_ = this->create_publisher<sensor_msgs::msg::LaserScan>("laser_scan", 20);
-      timer_ = this->create_wall_timer( 0ms, [this]()->void{ this->call_back(); });
+      // timer_ = this->create_wall_timer( 0ms, [this]()->void{ this->call_back(); });
     }
 
     
@@ -90,6 +90,7 @@ class Lidar_Publisher : public rclcpp::Node
     dist_ = test.substr(d_indx+1, sizeof(buffer));
     vec.push_back((float) stof(dist_)/1000.0);
     msg_scan.angle_max = (float) stof(angle_)*M_PI / 180.0;
+
     msg_scan.header.frame_id = "laser_frame";
     msg_scan.header.stamp = this->now();
     msg_scan.angle_increment = (float) (msg_scan.angle_max - msg_scan.angle_min);
@@ -103,7 +104,7 @@ class Lidar_Publisher : public rclcpp::Node
     vec.clear();
   }
   
-  void call_back_tcp(){
+  // void call_back_tcp(){
   // for(int i=0; i<BUFF_SIZE; ++i){
   //   distance_[i] = 0.0;
   //   input_data = "";
@@ -146,7 +147,7 @@ class Lidar_Publisher : public rclcpp::Node
   // msg_scan.ranges.assign(std::begin(distance_), std::end(distance_));
   // msg_scan.intensities.assign(std::begin(distance_), std::end(distance_)); 
   // this->publisher_->publish(msg_scan);
-  }
+  // }
   
   private:
   rclcpp::TimerBase::SharedPtr timer_;

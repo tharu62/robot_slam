@@ -34,6 +34,14 @@ def generate_launch_description():
                 parameters=[{'use_sim_time': True}]   
         )
 
+        # lidar_tf2 =  Node(
+        #         package='robot_slam',
+        #         executable='lidar_tf2',
+        #         name='lidar_tf2',
+        #         output='screen',
+        #         parameters=[{'use_sim_time': True}]   
+        # )
+
         listener_keys =  Node(
                 package='robot_slam',
                 executable='listener_keys',

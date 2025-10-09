@@ -1,4 +1,4 @@
-// specifications for UART data trasmission
+// specifications for USART data trasmission
 #define WIFI_PORT 80
 #define RXPIN 3
 #define TXPIN 18
