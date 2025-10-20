@@ -13,7 +13,7 @@ A step-by-step guide on building a **differential drive robot** capable of perfo
     - [DC Motors](#dc-motors)
     - [Lidar](#lidar) 
   > [Motor Driver](#motor-driver) 
-  
+
   > [Others](#others) 
 - [Software](#💻-software) 
   > [Operating System](#operating-system) 
@@ -69,23 +69,24 @@ Encoder feedback enables precise **odometry** calculations and feeds data into t
 Accurate motor control is critical for stable SLAM mapping and localization.
 
 #### Lidar
-A **LDS02RR Lidar sensor** is used for 2D environmental scanning.  
-It publishes continuous **LaserScan** data to the `/scan` topic.  
+A **LDS02RR Lidar sensor** is used for 2D environmental scanning. It's a Laser sensor mounted on a rotating platform moved by a motor.  
+It publishes continuous **LaserScan** data by UART. The microcontroller decodes the data and publishes them to the `/laser_scan` topic.  
 This data is used by the remote SLAM node to construct a map and detect obstacles in real time.
+Both the laser and the motor use 5V but the data is on 3.3V logic level.
 
 ---
 
 ### Motor Driver
 The **L298N motor driver** controls the motor speed and direction using **PWM** signals.  
-It interfaces with the Raspberry Pi through a **logic level shifter**, ensuring voltage compatibility (5V ↔ 3.3V).  
-The driver receives commands from the `/cmd_vel` topic and translates them into motor actions.
+It interfaces with the Raspberry Pi through a **logic level shifter**, ensuring voltage compatibility (MD 5V ↔ 3.3V RB PI).  
+The driver receives commands from the `/cmd_vel` topic and translates them into motor actions with PWM.
 
 ---
 
 ### Others
 - **Logic Level Shifter:** Protects the Raspberry Pi GPIO from overvoltage.  
-- **Power Supply:** Stable 12V power source, ideally regulated for consistent current delivery.  
-- **Chassis:** A lightweight frame with two driven wheels and a caster wheel for balance.  
+- **Power Supply:** Stable 12V and 5V power supply or one 5V power supply with a 5V → 12V DC converter, ideally regulated for consistent current delivery.  
+- **Chassis:** A lightweight wood frame with two driven wheels and a caster wheel for balance.  
 - **Wi-Fi Connectivity:** Enables ROS2 communication between the robot and host system.
 
 ---
@@ -111,21 +112,40 @@ The system can also be adapted for **ROS 2 Humble**, but Jazzy was used for full
 ### Code and Architecture
 
 #### Overview
-The software is organized into a modular **ROS2 workspace**, with each hardware and control function encapsulated in a node.
+The software is organized into **ROS2 packages**, with each hardware and control function encapsulated in a node.
+
+There are 4 custom packages in total: 
+```bash
+robot_slam (wich is the main directory of this repository) 
+slam_core 
+robot_interfaces
+my_launch
+```
+The other packages can be found and installed from public repositories or installed through package manager:
+```bash
+apt install ros2-jazzy-slam-toolbox
+apt install ros2-jazzy-teleop-twist-keyboard (ALREADY PREINSTALLED IN ROS2)
+```
 
 #### Core Nodes
-| Node | Function |
-|------|-----------|
-| `motor_controller_node` | Converts `/cmd_vel` velocity commands into PWM signals for motor control |
-| `encoder_publisher_node` | Publishes wheel encoder data and computes odometry (`/odom`) |
-| `lidar_publisher_node` | Publishes Lidar scans to `/scan` |
-| `slam_processor` | (Remote) Runs **SLAM Toolbox** or **Cartographer** using `/odom` and `/scan` data |
-| `teleop_node` | Enables manual control from keyboard or joystick |
+| Machine | Package | Node | Function |
+|---------|---------|------|----------|
+|robot| slam_core | `sub_vel` | Converts `/cmd_vel` velocity commands from remote into PWM signals for motor control |
+|robot| slam_core | `pub_lidar` | Decodes Lidar messages from GPIO by UART and publishes the Lidar scans to `/scan` topic |
+|robot| slam_core | `pub_odom` | Decodes wheel encoder data from GPIO and publishes encoder steps to `/dif_drive` topic |
+|remote| robot_slam | `pub_odom` | Publishes wheel encoder data received from the robot (`/dif_drive`) and computes and publishes the odometry to `/odom` topic |
+|remote| slam_toolbox | `slam` | Runs **SLAM Toolbox** or **Cartographer** using `/odom` and `/scan` topics |
+|remote| teleop_twist_keyboard | `teleop_twist_keyboard` | Enables manual control of robot from keyboard |
 
 ---
 
-#### Architecture Flow
-
+#### SetUp and Run SLAM
+1) Power the **Raspberry Pi** and check if **Lidar** and **Motors** are ON.
+2) From the remote Linux system **connect to the robot whith ssh**. 
+3) From the ssh terminal **source the setup.bash and manually launch the ros2 nodes for the sensors and the motors** (The Launch File make the procedure very fast as it require a single command from terminal).
+4) From the remote Linux system **source the setup.bash and start the teleop_twist_keyboard node** to control the robot and check if the robot moves.
+4) From the remote Linux system **start the robot_slam nodes** and wait until the rviz2 GUI starts.
+5) From the remote Linux system **start the slam_toolbox** node.
 
 ## 🧩 Conclusions
 This project demonstrates that even low-cost hardware can perform effective SLAM using **ROS2** and distributed processing.  
@@ -136,7 +156,7 @@ By offloading SLAM to a remote computer, the Raspberry Pi Zero 2W becomes a ligh
 ## ⚠️ Errors and Warnings
 - Ensure **both devices are on the same Wi-Fi network** — ROS2 discovery may fail across subnets.  
 - **Encoder noise** may cause odometry drift — consider hardware debouncing or filtering.  
-- **Power drops** can reboot the Pi — use a regulated DC-DC converter (12V → 5V).  
+- **Power drops** can reboot the Pi — use a regulated DC-DC converter (5V → 12V).  
 - If ROS2 topics don’t appear, verify **Fast DDS network visibility** with `ros2 topic list`.
 
 ---
