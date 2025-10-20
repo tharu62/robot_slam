@@ -5,23 +5,25 @@ A step-by-step guide on building a **differential drive robot** capable of perfo
 ---
 
 ## 📚 Table of Contents
-## [Project Description](#🧠-project-description) 
-  - [Brief](#brief) 
-## [Hardware](#⚙️-hardware) 
+- [Project Description](#🧠-project-description) 
+  > [Brief](#brief) 
+- [Hardware](#⚙️-hardware) 
   - [Microcontroller](#microcontroller) 
   - [Sensors and Actuators](#sensors-and-actuators) 
     > [DC Motors](#dc-motors)
-    
+
     > [Lidar](#lidar) 
   - [Motor Driver](#motor-driver) 
   - [Others](#others) 
-## [Software](#💻-software) 
-  - [Operating System](#operating-system) 
-  - [ROS](#ros) 
-  - [Code and Architecture](#code-and-architecture) 
-## [Conclusions](#🧩-conclusions) 
-## [Errors and Warnings](#⚠️-errors-and-warnings) 
-## [WSL Options](#🪟-wsl-options) 
+- [Software](#💻-software) 
+  > [Operating System](#operating-system) 
+
+  > [ROS](#ros) 
+  
+  > [Code and Architecture](#code-and-architecture) 
+- [Conclusions](#🧩-conclusions) 
+- [Errors and Warnings](#⚠️-errors-and-warnings) 
+- [WSL Options](#🪟-wsl-options) 
 ---
 
 ## 🧠 Project Description
