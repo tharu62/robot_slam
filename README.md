@@ -6,15 +6,15 @@ A step-by-step guide on building a **differential drive robot** capable of perfo
 
 ## 📚 Table of Contents
 - [Project Description](#🧠-project-description) 
-  > [Brief](#brief) 
 - [Hardware](#⚙️-hardware) 
-  - [Microcontroller](#microcontroller) 
-  - [Sensors and Actuators](#sensors-and-actuators) 
-    > [DC Motors](#dc-motors)
+  > [Microcontroller](#microcontroller) 
 
-    > [Lidar](#lidar) 
-  - [Motor Driver](#motor-driver) 
-  - [Others](#others) 
+  > [Sensors and Actuators](#sensors-and-actuators) 
+    - [DC Motors](#dc-motors)
+    - [Lidar](#lidar) 
+  > [Motor Driver](#motor-driver) 
+  
+  > [Others](#others) 
 - [Software](#💻-software) 
   > [Operating System](#operating-system) 
 
@@ -28,7 +28,6 @@ A step-by-step guide on building a **differential drive robot** capable of perfo
 
 ## 🧠 Project Description
 
-### Brief
 This project details the design and setup of a **differential drive robot** capable of performing **Simultaneous Localization and Mapping (SLAM)**.  
 The robot operates on a flat plane (no movement along the Z-axis) and can be remotely controlled using **ROS 2** commands.
 
