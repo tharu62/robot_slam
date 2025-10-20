@@ -1,26 +1,26 @@
 # ROBOT SLAM
 
-A step-by-step guide on building a **differential drive robot** capable of performing **SLAM (Simultaneous Localization and Mapping)** using **ROS 2** and a **Raspberry Pi Zero 2W**.
+A step-by-step guide on building a **differential drive robot** capable of performing **SLAM (Simultaneous Localization and Mapping)** using **ROS2** and a **Raspberry Pi Zero 2W**.
 
 ---
 
 ## 📚 Table of Contents
-- [Project Description](#🧠-project-description)
+### [Project Description](#🧠-project-description)
   - [Brief](#brief)
-  - [Hardware](#⚙️-hardware)
-    - [Microcontroller](#microcontroller)
-    - [Sensors and Actuators](#sensors-and-actuators)
-      - [DC Motors](#dc-motors)
-      - [Lidar](#lidar)
-    - [Motor Driver](#motor-driver)
-    - [Others](#others)
-  - [Software](#💻-software)
-    - [Operating System](#operating-system)
-    - [ROS](#ros)
-    - [Code and Architecture](#code-and-architecture)
-- [Conclusions](#🧩-conclusions)
-- [Errors and Warnings](#⚠️-errors-and-warnings)
-- [WSL Options](#🪟-wsl-options)
+### [Hardware](#⚙️-hardware)
+  - [Microcontroller](#microcontroller)
+  - [Sensors and Actuators](#sensors-and-actuators)
+    - [DC Motors](#dc-motors)
+    - [Lidar](#lidar)
+  - [Motor Driver](#motor-driver)
+  - [Others](#others)
+### [Software](#💻-software)
+  - [Operating System](#operating-system)
+  - [ROS](#ros)
+  - [Code and Architecture](#code-and-architecture)
+### [Conclusions](#🧩-conclusions)
+### [Errors and Warnings](#⚠️-errors-and-warnings)
+### [WSL Options](#🪟-wsl-options)
 ---
 
 ## 🧠 Project Description
@@ -124,19 +124,9 @@ The software is organized into a modular **ROS2 workspace**, with each hardware 
 
 #### Architecture Flow
 
-```mermaid
-graph LR
-  A[DC Motors + Encoders] -->|Odometry Data| B((Raspberry Pi))
-  C[Lidar LDS02RR] -->|LaserScan /scan| B
-  B -->|ROS2 Topics| D[Remote Machine (Ubuntu / WSL2)]
-  D -->|Velocity Commands /cmd_vel| B
-  D -->|SLAM Processing| E[Map + Localization (RViz2)]
-```
-
----
 
 ## 🧩 Conclusions
-This project demonstrates that even low-cost hardware can perform effective SLAM using **ROS 2** and distributed processing.  
+This project demonstrates that even low-cost hardware can perform effective SLAM using **ROS2** and distributed processing.  
 By offloading SLAM to a remote computer, the Raspberry Pi Zero 2W becomes a lightweight, real-time control platform for robotics experimentation.
 
 ---
