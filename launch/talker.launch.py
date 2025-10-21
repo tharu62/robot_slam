@@ -10,14 +10,6 @@ def generate_launch_description():
         
         ld = LaunchDescription()
 
-        talker_lidar = Node(
-                package='robot_slam',
-                executable='talker_lidar',
-                name='talker_lidar',
-                output='screen',
-                parameters=[{'use_sim_time': True}]
-        )
-
         talker_odom = Node(
                 package='robot_slam',
                 executable='talker_odom',
@@ -34,21 +26,6 @@ def generate_launch_description():
                 parameters=[{'use_sim_time': True}]   
         )
 
-        # lidar_tf2 =  Node(
-        #         package='robot_slam',
-        #         executable='lidar_tf2',
-        #         name='lidar_tf2',
-        #         output='screen',
-        #         parameters=[{'use_sim_time': True}]   
-        # )
-
-        listener_keys =  Node(
-                package='robot_slam',
-                executable='listener_keys',
-                name='listener_keys',
-                output='screen',
-                parameters=[{'use_sim_time': True}]  
-        )
                 
         # These parameters are maintained for backwards compatibility
         gui_arg = DeclareLaunchArgument(name='gui', default_value='true', choices=['true', 'false'],
