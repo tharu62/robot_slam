@@ -145,10 +145,24 @@ apt install ros2-jazzy-teleop-twist-keyboard (ALREADY PREINSTALLED IN ROS2)
 #### SetUp and Run SLAM
 1) Power the **Raspberry Pi** and check if **Lidar** and **Motors** are ON.
 2) From the remote Linux system **connect to the robot whith ssh**. 
-3) From the ssh terminal **source the setup.bash and manually launch the ros2 nodes for the sensors and the motors** (The Launch File make the procedure very fast as it require a single command from terminal).
+3) From the ssh terminal **source the setup.bash and manually launch the ros2 nodes for the sensors and the motors** (the Launch File make the procedure very fast as it require a single command from terminal).
+```bash
+~/Ros$ source install/setup.bash
+~/Ros$ ros2 launch my_launch slam_core.launch.py
+```
 4) From the remote Linux system **source the setup.bash and start the teleop_twist_keyboard node** to control the robot and check if the robot moves.
-4) From the remote Linux system **start the robot_slam node** and wait until the rviz2 GUI starts.
+```bash
+~/Ros$ source install/setup.bash
+~/Ros$ ros2 run teleop_twist_keyboard teleop_twist_keyboard 
+```
+4) From the remote Linux system **start the robot_slam node** and wait until the rviz2 GUI starts (the launch.bash file is in the "extra" folder, move it in the ros workspace for better usability).
+```bash
+~/Ros$ source launch.bash
+```
 5) From the remote Linux system **start the slam_toolbox** node.
+```bash
+~/Ros$ ros2 launch slam_toolbox online_async_launch.py use_sim_time:=false
+```
 6) You should now see the map on the rviz gui.
 
 ## 🧩 Conclusions
