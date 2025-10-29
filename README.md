@@ -32,7 +32,7 @@ A step-by-step guide on building a **differential drive robot** capable of perfo
 ## 🧠 Project Description
 
 This project details the design and setup of a **differential drive robot** capable of performing **Simultaneous Localization and Mapping (SLAM)**.  
-The robot operates on a flat plane (no movement along the Z-axis) and can be remotely controlled using **ROS 2** commands.
+The robot operates on a flat plane (no movement along the Z-axis) and can be remotely controlled using **ROS2** commands.
 
 Because the onboard hardware has limited computational power, SLAM is not performed locally. Instead, the robot transmits all sensor data via **ROS topics** to a Linux machine that performs the heavy computations for mapping and localization.
 
@@ -46,7 +46,7 @@ Because the onboard hardware has limited computational power, SLAM is not perfor
 - 2x 12V DC Motors with Encoders (37 RPM)
 - 1x Lidar (LDS02RR)
 - 1x Motor Driver (L298N)
-- 1x Logic Level Shifter
+- 2x Logic Level Shifter
 - 2x Wheels (~6 cm radius)
 - 2x Power Supply (12V Li-ion or LiPo | 5V battery bank)
 ```
@@ -104,11 +104,11 @@ See [WSL Options](#🪟-wsl-options) for setup notes.
 ---
 
 ### ROS
-The robot uses **ROS 2 Jazzy Jalisco** on both the robot and the remote machine.  
+The robot uses **ROS2 Jazzy Jalisco** on both the robot and the remote machine.  
 Communication between nodes occurs over the local Wi-Fi network using **Fast DDS**.  
-> 💡 For the robot, install the **ROS 2 base** package only (no GUI), as it performs no graphical processing.
+> 💡 For the robot, install the **ROS2 base** package only (no GUI), as it performs no graphical processing.
 
-The system can also be adapted for **ROS 2 Humble**, but Jazzy was used for full testing and validation.
+The system can also be adapted for **ROS2 Humble**, but Jazzy was used for full testing and validation.
 
 ---
 
@@ -121,7 +121,7 @@ There are 4 custom packages in total:
 ```bash
 robot_slam (wich is the main directory of this repository) 
 slam_core 
-robot_interfaces
+robot_interfaces (optional for future implementation)
 my_launch
 ```
 The other packages can be found and installed from public repositories or installed through package manager:
