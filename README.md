@@ -70,7 +70,7 @@ Accurate motor control is critical for stable SLAM mapping and localization.
 
 #### Lidar
 A **LDS02RR Lidar sensor** is used for 2D environmental scanning. It's a Laser sensor mounted on a rotating platform moved by a motor.  
-It publishes continuous **LaserScan** data by UART. The microcontroller decodes the data and publishes them to the `/laser_scan` topic.  
+It publishes continuous **LaserScan** data by UART. The microcontroller decodes the data and publishes them to the `/scan` topic.  
 This data is used by the remote SLAM node to construct a map and detect obstacles in real time.
 Both the laser and the motor use 5V but the data is on 3.3V logic level.
 
@@ -131,9 +131,9 @@ apt install ros2-jazzy-teleop-twist-keyboard (ALREADY PREINSTALLED IN ROS2)
 | Machine | Package | Node | Function |
 |---------|---------|------|----------|
 |robot| slam_core | `sub_vel` | Converts `/cmd_vel` velocity commands from remote into PWM signals for motor control |
-|robot| slam_core | `pub_lidar` | Decodes Lidar messages from GPIO by UART and publishes the Lidar scans to `/scan` topic |
-|robot| slam_core | `pub_odom` | Decodes wheel encoder data from GPIO and publishes encoder steps to `/dif_drive` topic |
-|remote| robot_slam | `pub_odom` | Publishes wheel encoder data received from the robot (`/dif_drive`) and computes and publishes the odometry to `/odom` topic |
+|robot| slam_core | `pub_lidar` | Decodes Lidar messages from GPIO by UART and publishes the Lidar scans to `/scan` topic (with parent `laser_frame`)|
+|robot| slam_core | `pub_odom` | Decodes wheel encoder data from GPIO and publishes encoder steps to `/odom` topic and the dynimic tf_transform `odom`->`base_link`|
+|remote| robot_slam | `...` | Starts the rviz2 gui and the robot description (in the xacro file) with correct static tf_trasform for `base_link`->`laser_frame`|
 |remote| slam_toolbox | `slam` | Runs **SLAM Toolbox** or **Cartographer** using `/odom` and `/scan` topics |
 |remote| teleop_twist_keyboard | `teleop_twist_keyboard` | Enables manual control of robot from keyboard |
 
@@ -144,8 +144,9 @@ apt install ros2-jazzy-teleop-twist-keyboard (ALREADY PREINSTALLED IN ROS2)
 2) From the remote Linux system **connect to the robot whith ssh**. 
 3) From the ssh terminal **source the setup.bash and manually launch the ros2 nodes for the sensors and the motors** (The Launch File make the procedure very fast as it require a single command from terminal).
 4) From the remote Linux system **source the setup.bash and start the teleop_twist_keyboard node** to control the robot and check if the robot moves.
-4) From the remote Linux system **start the robot_slam nodes** and wait until the rviz2 GUI starts.
+4) From the remote Linux system **start the robot_slam node** and wait until the rviz2 GUI starts.
 5) From the remote Linux system **start the slam_toolbox** node.
+6) You should now see the map on the rviz gui.
 
 ## 🧩 Conclusions
 This project demonstrates that even low-cost hardware can perform effective SLAM using **ROS2** and distributed processing.  

@@ -1,3 +1,0 @@
-This repository is the package "robot_slam" contained in the remote machine on wich the SLAM is performed. 
-Remove the two ros_packages folders to have a clean package.
-Therefore this empty folder is symbolic only.

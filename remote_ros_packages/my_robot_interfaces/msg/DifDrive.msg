@@ -1,3 +1,0 @@
-float32 left_wheel_steps
-float32 right_wheel_steps
-float32 dt
