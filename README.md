@@ -2,7 +2,9 @@
 
 A step-by-step guide on building a **differential drive robot** capable of performing **SLAM (Simultaneous Localization and Mapping)** using **ROS2** and a **Raspberry Pi Zero 2W**.
 
-![alt text](robot_dif_drive.jpg)
+| Differential Drive Robot | SLAM Map |
+|:-------------------------:|:--------:|
+| ![Robot](robot_dif_drive.jpg) | ![Map](map.png) |
 
 ---
 
