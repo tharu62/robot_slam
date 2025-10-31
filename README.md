@@ -25,6 +25,8 @@ A step-by-step guide on building a **differential drive robot** capable of perfo
   > [ROS](#ros) 
   
   > [Code and Architecture](#code-and-architecture) 
+
+  > [SetUp and Run](#setup-and-run-slam)
 - [Conclusions](#🧩-conclusions) 
 - [Errors and Warnings](#⚠️-errors-and-warnings) 
 - [WSL Options](#🪟-wsl-options) 
