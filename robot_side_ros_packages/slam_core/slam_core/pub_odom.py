@@ -2,24 +2,24 @@
 import math
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import TransformStamped
 from nav_msgs.msg import Odometry
+from geometry_msgs.msg import TransformStamped
 from tf2_ros import TransformBroadcaster
 from tf_transformations import quaternion_from_euler
 from gpiozero import RotaryEncoder
 
-# Robot constants
-RADIUS = 0.06           # wheel radius [m]
-WHEELBASE = 0.3         # distance between wheels [m]
+# --- Robot constants ---
+RADIUS = 0.065         # Wheel radius [m]
+WHEELBASE = 0.335      # Distance between wheels [m]
 MAX_STEPS_LEFT = 1410
 MAX_STEPS_RIGHT = 1410
-
+DRIFT_CORRECTION = 1.6
 
 class OdomPublisher(Node):
     def __init__(self):
         super().__init__('odom_publisher')
 
-        # Publisher and TF broadcaster
+        # Publishers and TF broadcaster
         self.odom_pub = self.create_publisher(Odometry, 'odom', 10)
         self.tf_broadcaster = TransformBroadcaster(self)
 
@@ -37,45 +37,37 @@ class OdomPublisher(Node):
 
         # Publish odometry at 10 Hz
         self.create_timer(0.1, self.publish_odometry)
-
-        self.get_logger().info("OdomPublisher node started.")
+        self.get_logger().info("Odometry publisher initialized.")
 
     def publish_odometry(self):
         now = self.get_clock().now()
         dt = (now - self.last_time).nanoseconds / 1e9
-        if dt <= 0:
+        if dt <= 0.0:
             return
         self.last_time = now
 
-        # Read encoder steps (right inverted if necessary)
+        # Read and reset encoder steps
         steps_left = float(self.encoder_left.steps)
         steps_right = float(-self.encoder_right.steps)
-
-        # Reset for relative step count
         self.encoder_left.steps = 0
         self.encoder_right.steps = 0
 
-        # Convert to distances
+        # Convert steps to distance
         D_left = steps_left * 2 * math.pi * RADIUS / MAX_STEPS_LEFT
         D_right = steps_right * 2 * math.pi * RADIUS / MAX_STEPS_RIGHT
         D_avg = (D_left + D_right) / 2.0
-        delta_theta = (D_right - D_left) / WHEELBASE
+        delta_theta = (D_left - D_right) / WHEELBASE
 
-        # Update orientation (normalize)
-        self.theta += delta_theta
-        self.theta = math.atan2(math.sin(self.theta), math.cos(self.theta))
-
-        # Update position
-        delta_x = D_avg * math.cos(self.theta)
-        delta_y = D_avg * math.sin(self.theta)
-        self.x += delta_x
-        self.y += delta_y
+        # Update robot pose
+        self.theta += delta_theta * DRIFT_CORRECTION
+        self.x += D_avg * math.cos(self.theta)
+        self.y += D_avg * math.sin(self.theta)
 
         # Velocities
         v = D_avg / dt
         w = delta_theta / dt
 
-        # Create Odometry message
+        # --- Odometry message ---
         odom_msg = Odometry()
         odom_msg.header.stamp = now.to_msg()
         odom_msg.header.frame_id = 'odom'
@@ -94,10 +86,9 @@ class OdomPublisher(Node):
         odom_msg.twist.twist.linear.x = v
         odom_msg.twist.twist.angular.z = w
 
-        # Publish odometry
         self.odom_pub.publish(odom_msg)
 
-        # Broadcast transform
+        # --- TF transform ---
         t = TransformStamped()
         t.header.stamp = now.to_msg()
         t.header.frame_id = 'odom'
@@ -119,9 +110,10 @@ def main(args=None):
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
-        pass
-    node.destroy_node()
-    rclpy.shutdown()
+        pass  # no logging
+    finally:
+        node.destroy_node()
+    # NO rclpy.shutdown() here
 
 
 if __name__ == '__main__':
